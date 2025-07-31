@@ -1,0 +1,77 @@
+@model GraphQL.WebApi.Mvc.Models.Customer
+
+@{
+    ViewData["Title"] = "Customer Details";
+}
+
+<div class="container mt-4">
+    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @ViewBag.ErrorMessage
+        </div>
+    }
+
+    @if (Model != null)
+    {
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="mb-0">Customer Details</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <dl class="row">
+                                    <dt class="col-sm-4">ID:</dt>
+                                    <dd class="col-sm-8">@Model.Id</dd>
+
+                                    <dt class="col-sm-4">First Name:</dt>
+                                    <dd class="col-sm-8">@Model.FirstName</dd>
+
+                                    <dt class="col-sm-4">Last Name:</dt>
+                                    <dd class="col-sm-8">@Model.LastName</dd>
+                                </dl>
+                            </div>
+                            <div class="col-md-6">
+                                <dl class="row">
+                                    <dt class="col-sm-4">Contact:</dt>
+                                    <dd class="col-sm-8">@Model.Contact</dd>
+
+                                    <dt class="col-sm-4">Email:</dt>
+                                    <dd class="col-sm-8">
+                                        <a href="mailto:@Model.Email">@Model.Email</a>
+                                    </dd>
+
+                                    <dt class="col-sm-4">Date of Birth:</dt>
+                                    <dd class="col-sm-8">@Model.DateOfBirth.ToString("MMMM dd, yyyy")</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="@Url.Action("Index", "Customers")" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning" role="alert">
+            Customer not found.
+        </div>
+        <a href="@Url.Action("Index", "Customers")" class="btn btn-primary">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        console.log('Customer details page loaded');
+    </script>
+} 

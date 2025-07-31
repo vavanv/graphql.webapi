@@ -1,0 +1,65 @@
+@model IEnumerable<GraphQL.WebApi.Mvc.Models.Customer>
+
+@{
+    ViewData["Title"] = "Customers";
+}
+
+<div class="container mt-4">
+    <h1>Customers</h1>
+    
+    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @ViewBag.ErrorMessage
+        </div>
+    }
+
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Contact</th>
+                        <th>Email</th>
+                        <th>Date of Birth</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var customer in Model)
+                    {
+                        <tr>
+                            <td>@customer.Id</td>
+                            <td>@customer.FirstName @customer.LastName</td>
+                            <td>@customer.Contact</td>
+                            <td>@customer.Email</td>
+                            <td>@customer.DateOfBirth.ToString("MM/dd/yyyy")</td>
+                            <td>
+                                <a href="@Url.Action("Details", "Customers", new { id = customer.Id })" 
+                                   class="btn btn-primary btn-sm">
+                                    <i class="bi bi-eye"></i> Details
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info" role="alert">
+            No customers found.
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Add any JavaScript functionality here
+        console.log('Customers page loaded');
+    </script>
+} 

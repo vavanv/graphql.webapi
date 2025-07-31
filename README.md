@@ -1,6 +1,6 @@
 # GraphQL Web API with ASP.NET Core 8
 
-A modern GraphQL API built with **ASP.NET Core 8** and **HotChocolate GraphQL** that demonstrates GraphQL implementation with Entity Framework Core and SQL Server.
+A modern GraphQL API built with **ASP.NET Core 8** and **HotChocolate GraphQL** that demonstrates GraphQL implementation with Entity Framework Core and SQL Server. The solution includes both a GraphQL API and an MVC web application.
 
 ## 🚀 Features
 
@@ -9,6 +9,7 @@ A modern GraphQL API built with **ASP.NET Core 8** and **HotChocolate GraphQL** 
 - **Entity Framework Core 8**: Latest ORM with improved performance
 - **SQL Server LocalDB**: Local database for development
 - **Banana Cake Pop**: Built-in GraphQL IDE for testing
+- **MVC Web Application**: User-friendly web interface for data visualization
 - **Nullable Reference Types**: Better null safety throughout
 - **Auto Database Seeding**: Sample data automatically populated on startup
 
@@ -25,6 +26,7 @@ A modern GraphQL API built with **ASP.NET Core 8** and **HotChocolate GraphQL** 
 - **HotChocolate GraphQL 13.5.0**
 - **SQL Server LocalDB**
 - **Banana Cake Pop IDE**
+- **ASP.NET Core MVC**
 
 ## 🚀 Getting Started
 
@@ -47,28 +49,44 @@ dotnet ef migrations add InitialCreate
 dotnet ef database update
 ```
 
-### 4. Run the Application
+### 4. Run the GraphQL API
 
 ```bash
 dotnet run
 ```
 
-The application will start on:
+The GraphQL API will start on:
 
 - **HTTP**: `http://localhost:5000`
 - **HTTPS**: `https://localhost:5001`
 
-## 🎯 GraphQL Endpoints
+### 5. Run the MVC Application
 
-### **GraphQL Endpoint**
+In a new terminal:
 
-- **URL**: `http://localhost:5000/graphql`
+```bash
+cd GraphQL.WebApi.Mvc
+dotnet run
+```
+
+The MVC application will start on:
+
+- **HTTP**: `http://localhost:5002`
+- **HTTPS**: `https://localhost:5231`
+
+## 🎯 Available Applications
+
+### **GraphQL API**
+
+- **URL**: `https://localhost:5001/graphql`
 - **Purpose**: Raw GraphQL queries
+- **Banana Cake Pop IDE**: `https://localhost:5001/graphql/` (with trailing slash)
 
-### **Banana Cake Pop IDE**
+### **MVC Web Application**
 
-- **URL**: `http://localhost:5000/graphql/` (with trailing slash)
-- **Purpose**: Interactive GraphQL testing interface
+- **URL**: `https://localhost:5231`
+- **Purpose**: User-friendly web interface
+- **Features**: Customer list, customer details, navigation
 
 ## 📊 Available Queries
 
@@ -135,16 +153,34 @@ CREATE TABLE [Customers] (
 
 ```
 GraphQL.WebApi/
-├── Data/
-│   ├── ApplicationDbContext.cs    # EF Core DbContext
-│   └── DbInitializer.cs          # Database seeding
-├── GraphQL/
-│   └── Query.cs                  # GraphQL queries
-├── Model/
-│   └── Customer.cs               # Customer entity
-├── Program.cs                    # Application entry point
-├── appsettings.json              # Configuration
-└── seed-data.sql                 # Manual SQL seeding script
+├── GraphQL.WebApi/              # GraphQL API Project
+│   ├── Data/
+│   │   ├── ApplicationDbContext.cs    # EF Core DbContext
+│   │   └── DbInitializer.cs          # Database seeding
+│   ├── GraphQL/
+│   │   └── Query.cs                  # GraphQL queries
+│   ├── Model/
+│   │   └── Customer.cs               # Customer entity
+│   ├── Program.cs                    # Application entry point
+│   ├── appsettings.json              # Configuration
+│   └── seed-data.sql                 # Manual SQL seeding script
+├── GraphQL.WebApi.Mvc/           # MVC Web Application
+│   ├── Controllers/
+│   │   ├── HomeController.cs         # Home page controller
+│   │   └── CustomersController.cs    # Customer operations
+│   ├── Models/
+│   │   └── Customer.cs               # Customer model
+│   ├── Services/
+│   │   ├── IGraphQLService.cs        # GraphQL service interface
+│   │   └── GraphQLService.cs         # GraphQL client implementation
+│   ├── Views/
+│   │   ├── Home/
+│   │   │   └── Index.cshtml          # Home page
+│   │   └── Customers/
+│   │       ├── Index.cshtml          # Customer list
+│   │       └── Details.cshtml        # Customer details
+│   └── Program.cs                    # MVC application entry point
+└── GraphQL.WebApi.sln             # Solution file
 ```
 
 ## 🔧 Configuration
@@ -168,20 +204,48 @@ builder.Services
     .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = true);
 ```
 
+### **MVC GraphQL Client Configuration**
+
+```csharp
+builder.Services.AddHttpClient<IGraphQLService, GraphQLService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:5001/graphql");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+});
+```
+
 ## 🧪 Testing
 
 ### **Using Banana Cake Pop**
 
-1. Navigate to `http://localhost:5000/graphql/`
+1. Navigate to `https://localhost:5001/graphql/`
 2. Use the interactive interface to test queries
 3. Explore the schema documentation
+
+### **Using MVC Web Application**
+
+1. Navigate to `https://localhost:5231`
+2. Click on "Customers" in the navigation
+3. View customer list and details
 
 ### **Using curl**
 
 ```bash
-curl -X POST http://localhost:5000/graphql \
+curl -X POST https://localhost:5001/graphql \
   -H "Content-Type: application/json" \
-  -d '{"query":"query { customers { id firstName lastName } }"}'
+  -d '{"query":"query { customers { id firstName lastName } }"}' \
+  -k
+```
+
+### **Using PowerShell Test Script**
+
+```powershell
+# Run the test script to verify both applications
+powershell -ExecutionPolicy Bypass -File test-graphql.ps1
 ```
 
 ## 🔍 Troubleshooting
@@ -202,9 +266,20 @@ curl -X POST http://localhost:5000/graphql \
    - Check application logs for detailed error messages
    - Verify database has been seeded with sample data
 
-4. **Port conflicts**
+4. **MVC application can't connect to GraphQL API**
+
+   - Ensure GraphQL API is running on port 5001 (HTTPS)
+   - Check the base address in `Program.cs`
+   - SSL certificate issues are handled automatically in development
+
+5. **SSL Certificate Issues**
+
+   - The MVC application is configured to ignore SSL certificate validation for development
+   - Use HTTPS endpoints: `https://localhost:5001/graphql` and `https://localhost:5231`
+
+6. **Port conflicts**
    - Change ports in `Properties/launchSettings.json`
-   - Or kill processes using ports 5000/5001
+   - Or kill processes using the required ports
 
 ### **Database Management**
 
@@ -234,6 +309,9 @@ curl -X POST http://localhost:5000/graphql \
 - ✅ **Enhanced error handling**
 - ✅ **Auto database seeding**
 - ✅ **Modern GraphQL IDE integration**
+- ✅ **Added MVC web application**
+- ✅ **GraphQL client integration**
+- ✅ **SSL certificate handling for development**
 
 ## 📄 License
 

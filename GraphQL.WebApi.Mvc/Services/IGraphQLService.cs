@@ -1,0 +1,10 @@
+using GraphQL.WebApi.Mvc.Models;
+
+namespace GraphQL.WebApi.Mvc.Services
+{
+    public interface IGraphQLService
+    {
+        Task<List<Customer>> GetCustomersAsync();
+        Task<Customer?> GetCustomerByIdAsync(int id);
+    }
+}

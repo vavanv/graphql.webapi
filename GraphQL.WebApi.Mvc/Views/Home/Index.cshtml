@@ -1,0 +1,46 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">GraphQL Web API Demo</h1>
+    <p class="lead">A modern GraphQL API with ASP.NET Core 8 and HotChocolate</p>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">GraphQL API</h5>
+                    <p class="card-text">Access the GraphQL API directly</p>
+                    <a href="https://localhost:5001/graphql/" target="_blank" class="btn btn-primary">
+                        <i class="bi bi-graph-up"></i> Banana Cake Pop IDE
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Customers</h5>
+                    <p class="card-text">View customers through the MVC interface</p>
+                    <a href="@Url.Action("Index", "Customers")" class="btn btn-success">
+                        <i class="bi bi-people"></i> View Customers
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="alert alert-info" role="alert">
+                <h6>Available Endpoints:</h6>
+                <ul class="mb-0">
+                    <li><strong>GraphQL API:</strong> <code>https://localhost:5001/graphql</code></li>
+                    <li><strong>Banana Cake Pop IDE:</strong> <code>https://localhost:5001/graphql/</code></li>
+                    <li><strong>MVC Application:</strong> <code>https://localhost:5231</code></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
