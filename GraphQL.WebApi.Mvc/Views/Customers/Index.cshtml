@@ -5,7 +5,20 @@
 }
 
 <div class="container mt-4">
-    <h1>Customers</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Customers</h1>
+        <a href="@Url.Action("Create", "Customers")" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Create New Customer
+        </a>
+    </div>
+    
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
     
     @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
     {
@@ -52,7 +65,8 @@
     else
     {
         <div class="alert alert-info" role="alert">
-            No customers found.
+            <i class="bi bi-info-circle"></i> No customers found. 
+            <a href="@Url.Action("Create", "Customers")" class="alert-link">Create the first customer</a>.
         </div>
     }
 </div>

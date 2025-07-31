@@ -1,6 +1,6 @@
 # GraphQL Web API with ASP.NET Core 8
 
-A modern GraphQL API built with **ASP.NET Core 8** and **HotChocolate GraphQL** that demonstrates GraphQL implementation with Entity Framework Core and SQL Server. The solution includes both a GraphQL API and an MVC web application.
+A modern GraphQL API built with **ASP.NET Core 8** and **HotChocolate GraphQL** that demonstrates GraphQL implementation with Entity Framework Core and SQL Server. The solution includes both a GraphQL API and an MVC web application with full CRUD capabilities.
 
 ## 🚀 Features
 
@@ -10,6 +10,7 @@ A modern GraphQL API built with **ASP.NET Core 8** and **HotChocolate GraphQL** 
 - **SQL Server LocalDB**: Local database for development
 - **Banana Cake Pop**: Built-in GraphQL IDE for testing
 - **MVC Web Application**: User-friendly web interface for data visualization
+- **Full CRUD Operations**: Create, Read, Update, Delete customers
 - **Nullable Reference Types**: Better null safety throughout
 - **Auto Database Seeding**: Sample data automatically populated on startup
 
@@ -79,16 +80,16 @@ The MVC application will start on:
 ### **GraphQL API**
 
 - **URL**: `https://localhost:5001/graphql`
-- **Purpose**: Raw GraphQL queries
+- **Purpose**: Raw GraphQL queries and mutations
 - **Banana Cake Pop IDE**: `https://localhost:5001/graphql/` (with trailing slash)
 
 ### **MVC Web Application**
 
 - **URL**: `https://localhost:5231`
 - **Purpose**: User-friendly web interface
-- **Features**: Customer list, customer details, navigation
+- **Features**: Customer list, customer details, create new customers
 
-## 📊 Available Queries
+## 📊 Available Queries and Mutations
 
 ### 1. **Get All Customers**
 
@@ -117,6 +118,45 @@ query {
     email
     dateOfBirth
   }
+}
+```
+
+### 3. **Create New Customer**
+
+```graphql
+mutation (
+  $firstName: String!
+  $lastName: String!
+  $contact: String!
+  $email: String!
+  $dateOfBirth: DateTime!
+) {
+  addCustomer(
+    firstName: $firstName
+    lastName: $lastName
+    contact: $contact
+    email: $email
+    dateOfBirth: $dateOfBirth
+  ) {
+    id
+    firstName
+    lastName
+    contact
+    email
+    dateOfBirth
+  }
+}
+```
+
+**Variables:**
+
+```json
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "contact": "+1-555-0101",
+  "email": "john.doe@email.com",
+  "dateOfBirth": "1990-01-01T00:00:00.000Z"
 }
 ```
 
@@ -158,7 +198,8 @@ GraphQL.WebApi/
 │   │   ├── ApplicationDbContext.cs    # EF Core DbContext
 │   │   └── DbInitializer.cs          # Database seeding
 │   ├── GraphQL/
-│   │   └── Query.cs                  # GraphQL queries
+│   │   ├── Query.cs                  # GraphQL queries
+│   │   └── Mutation.cs               # GraphQL mutations
 │   ├── Model/
 │   │   └── Customer.cs               # Customer entity
 │   ├── Program.cs                    # Application entry point
@@ -167,7 +208,7 @@ GraphQL.WebApi/
 ├── GraphQL.WebApi.Mvc/           # MVC Web Application
 │   ├── Controllers/
 │   │   ├── HomeController.cs         # Home page controller
-│   │   └── CustomersController.cs    # Customer operations
+│   │   └── CustomersController.cs    # Customer operations (CRUD)
 │   ├── Models/
 │   │   └── Customer.cs               # Customer model
 │   ├── Services/
@@ -178,7 +219,8 @@ GraphQL.WebApi/
 │   │   │   └── Index.cshtml          # Home page
 │   │   └── Customers/
 │   │       ├── Index.cshtml          # Customer list
-│   │       └── Details.cshtml        # Customer details
+│   │       ├── Details.cshtml        # Customer details
+│   │       └── Create.cshtml         # Create customer form
 │   └── Program.cs                    # MVC application entry point
 └── GraphQL.WebApi.sln             # Solution file
 ```
@@ -201,6 +243,7 @@ GraphQL.WebApi/
 builder.Services
     .AddGraphQLServer()
     .AddQueryType<Query>()
+    .AddMutationType<Mutation>()
     .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = true);
 ```
 
@@ -223,7 +266,7 @@ builder.Services.AddHttpClient<IGraphQLService, GraphQLService>(client =>
 ### **Using Banana Cake Pop**
 
 1. Navigate to `https://localhost:5001/graphql/`
-2. Use the interactive interface to test queries
+2. Use the interactive interface to test queries and mutations
 3. Explore the schema documentation
 
 ### **Using MVC Web Application**
@@ -231,21 +274,32 @@ builder.Services.AddHttpClient<IGraphQLService, GraphQLService>(client =>
 1. Navigate to `https://localhost:5231`
 2. Click on "Customers" in the navigation
 3. View customer list and details
+4. Click "Create New Customer" to add new customers
 
 ### **Using curl**
 
 ```bash
+# Query all customers
 curl -X POST https://localhost:5001/graphql \
   -H "Content-Type: application/json" \
   -d '{"query":"query { customers { id firstName lastName } }"}' \
   -k
+
+# Create new customer
+curl -X POST https://localhost:5001/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query":"mutation($firstName: String!, $lastName: String!, $contact: String!, $email: String!, $dateOfBirth: DateTime!) { addCustomer(firstName: $firstName, lastName: $lastName, contact: $contact, email: $email, dateOfBirth: $dateOfBirth) { id firstName lastName } }","variables":{"firstName":"Test","lastName":"Customer","contact":"+1-555-9999","email":"test@email.com","dateOfBirth":"1990-01-01T00:00:00.000Z"}}' \
+  -k
 ```
 
-### **Using PowerShell Test Script**
+### **Using PowerShell Test Scripts**
 
 ```powershell
-# Run the test script to verify both applications
+# Test queries
 powershell -ExecutionPolicy Bypass -File test-graphql.ps1
+
+# Test mutations
+powershell -ExecutionPolicy Bypass -File test-mutation.ps1
 ```
 
 ## 🔍 Troubleshooting
@@ -278,8 +332,14 @@ powershell -ExecutionPolicy Bypass -File test-graphql.ps1
    - Use HTTPS endpoints: `https://localhost:5001/graphql` and `https://localhost:5231`
 
 6. **Port conflicts**
+
    - Change ports in `Properties/launchSettings.json`
    - Or kill processes using the required ports
+
+7. **Mutation errors**
+   - Ensure all required fields are provided
+   - Check date format (ISO 8601 format required)
+   - Verify GraphQL API includes mutation type in configuration
 
 ### **Database Management**
 
@@ -312,6 +372,8 @@ powershell -ExecutionPolicy Bypass -File test-graphql.ps1
 - ✅ **Added MVC web application**
 - ✅ **GraphQL client integration**
 - ✅ **SSL certificate handling for development**
+- ✅ **Added GraphQL mutations**
+- ✅ **Full CRUD operations via MVC**
 
 ## 📄 License
 

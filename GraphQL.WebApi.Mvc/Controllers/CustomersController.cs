@@ -48,5 +48,41 @@ namespace GraphQL.WebApi.Mvc.Controllers
                 return View();
             }
         }
+
+        // GET: Customers/Create
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: Customers/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("FirstName,LastName,Contact,Email,DateOfBirth")] Customer customer)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var createdCustomer = await _graphQLService.CreateCustomerAsync(customer);
+                    if (createdCustomer != null)
+                    {
+                        TempData["SuccessMessage"] = "Customer created successfully!";
+                        return RedirectToAction(nameof(Index));
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Failed to create customer. Please try again.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error creating customer");
+                    ModelState.AddModelError("", "An error occurred while creating the customer. Please try again.");
+                }
+            }
+
+            return View(customer);
+        }
     }
 } 

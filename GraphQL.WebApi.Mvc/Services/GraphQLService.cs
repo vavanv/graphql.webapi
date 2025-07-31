@@ -68,6 +68,41 @@ namespace GraphQL.WebApi.Mvc.Services
             }
         }
 
+        public async Task<Customer?> CreateCustomerAsync(Customer customer)
+        {
+            try
+            {
+                var mutation = @"
+                    mutation($firstName: String!, $lastName: String!, $contact: String!, $email: String!, $dateOfBirth: DateTime!) {
+                        addCustomer(firstName: $firstName, lastName: $lastName, contact: $contact, email: $email, dateOfBirth: $dateOfBirth) {
+                            id
+                            firstName
+                            lastName
+                            contact
+                            email
+                            dateOfBirth
+                        }
+                    }";
+
+                var variables = new
+                {
+                    firstName = customer.FirstName,
+                    lastName = customer.LastName,
+                    contact = customer.Contact,
+                    email = customer.Email,
+                    dateOfBirth = customer.DateOfBirth
+                };
+
+                var response = await ExecuteGraphQLQueryAsync(mutation, variables);
+                return response?.Data?.AddCustomer;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating customer via GraphQL API");
+                return null;
+            }
+        }
+
         private async Task<GraphQLResponse?> ExecuteGraphQLQueryAsync(string query, object? variables = null)
         {
             var request = new
@@ -100,6 +135,7 @@ namespace GraphQL.WebApi.Mvc.Services
     {
         public List<Customer>? Customers { get; set; }
         public Customer? Customer { get; set; }
+        public Customer? AddCustomer { get; set; }
     }
 
     public class GraphQLError

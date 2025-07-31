@@ -6,5 +6,6 @@ namespace GraphQL.WebApi.Mvc.Services
     {
         Task<List<Customer>> GetCustomersAsync();
         Task<Customer?> GetCustomerByIdAsync(int id);
+        Task<Customer?> CreateCustomerAsync(Customer customer);
     }
 }
