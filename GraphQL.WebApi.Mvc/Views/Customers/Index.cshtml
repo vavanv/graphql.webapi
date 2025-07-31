@@ -51,10 +51,16 @@
                             <td>@customer.Email</td>
                             <td>@customer.DateOfBirth.ToString("MM/dd/yyyy")</td>
                             <td>
-                                <a href="@Url.Action("Details", "Customers", new { id = customer.Id })" 
-                                   class="btn btn-primary btn-sm">
-                                    <i class="bi bi-eye"></i> Details
-                                </a>
+                                <div class="btn-group" role="group">
+                                    <a href="@Url.Action("Details", "Customers", new { id = customer.Id })" 
+                                       class="btn btn-primary btn-sm" title="View Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="@Url.Action("Edit", "Customers", new { id = customer.Id })" 
+                                       class="btn btn-warning btn-sm" title="Edit Customer">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     }

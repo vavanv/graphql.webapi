@@ -87,7 +87,7 @@ The MVC application will start on:
 
 - **URL**: `https://localhost:5231`
 - **Purpose**: User-friendly web interface
-- **Features**: Customer list, customer details, create new customers
+- **Features**: Customer list, customer details, create new customers, edit customers
 
 ## 📊 Available Queries and Mutations
 
@@ -160,6 +160,48 @@ mutation (
 }
 ```
 
+### 4. **Update Customer**
+
+```graphql
+mutation (
+  $id: Int!
+  $firstName: String!
+  $lastName: String!
+  $contact: String!
+  $email: String!
+  $dateOfBirth: DateTime!
+) {
+  updateCustomer(
+    id: $id
+    firstName: $firstName
+    lastName: $lastName
+    contact: $contact
+    email: $email
+    dateOfBirth: $dateOfBirth
+  ) {
+    id
+    firstName
+    lastName
+    contact
+    email
+    dateOfBirth
+  }
+}
+```
+
+**Variables:**
+
+```json
+{
+  "id": 1,
+  "firstName": "John Updated",
+  "lastName": "Doe",
+  "contact": "+1-555-0101",
+  "email": "updated.john.doe@email.com",
+  "dateOfBirth": "1990-01-01T00:00:00.000Z"
+}
+```
+
 ## 🗄️ Database
 
 ### **Connection Details**
@@ -220,7 +262,8 @@ GraphQL.WebApi/
 │   │   └── Customers/
 │   │       ├── Index.cshtml          # Customer list
 │   │       ├── Details.cshtml        # Customer details
-│   │       └── Create.cshtml         # Create customer form
+│   │       ├── Create.cshtml         # Create customer form
+│   │       └── Edit.cshtml           # Edit customer form
 │   └── Program.cs                    # MVC application entry point
 └── GraphQL.WebApi.sln             # Solution file
 ```
@@ -275,6 +318,7 @@ builder.Services.AddHttpClient<IGraphQLService, GraphQLService>(client =>
 2. Click on "Customers" in the navigation
 3. View customer list and details
 4. Click "Create New Customer" to add new customers
+5. Click the edit button (pencil icon) to modify existing customers
 
 ### **Using curl**
 
@@ -290,6 +334,12 @@ curl -X POST https://localhost:5001/graphql \
   -H "Content-Type: application/json" \
   -d '{"query":"mutation($firstName: String!, $lastName: String!, $contact: String!, $email: String!, $dateOfBirth: DateTime!) { addCustomer(firstName: $firstName, lastName: $lastName, contact: $contact, email: $email, dateOfBirth: $dateOfBirth) { id firstName lastName } }","variables":{"firstName":"Test","lastName":"Customer","contact":"+1-555-9999","email":"test@email.com","dateOfBirth":"1990-01-01T00:00:00.000Z"}}' \
   -k
+
+# Update customer
+curl -X POST https://localhost:5001/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query":"mutation($id: Int!, $firstName: String!, $lastName: String!, $contact: String!, $email: String!, $dateOfBirth: DateTime!) { updateCustomer(id: $id, firstName: $firstName, lastName: $lastName, contact: $contact, email: $email, dateOfBirth: $dateOfBirth) { id firstName lastName } }","variables":{"id":1,"firstName":"Updated","lastName":"Customer","contact":"+1-555-9999","email":"updated@email.com","dateOfBirth":"1990-01-01T00:00:00.000Z"}}' \
+  -k
 ```
 
 ### **Using PowerShell Test Scripts**
@@ -300,6 +350,9 @@ powershell -ExecutionPolicy Bypass -File test-graphql.ps1
 
 # Test mutations
 powershell -ExecutionPolicy Bypass -File test-mutation.ps1
+
+# Test updates
+powershell -ExecutionPolicy Bypass -File test-update.ps1
 ```
 
 ## 🔍 Troubleshooting
@@ -337,9 +390,15 @@ powershell -ExecutionPolicy Bypass -File test-mutation.ps1
    - Or kill processes using the required ports
 
 7. **Mutation errors**
+
    - Ensure all required fields are provided
    - Check date format (ISO 8601 format required)
    - Verify GraphQL API includes mutation type in configuration
+
+8. **Update errors**
+   - Ensure the customer ID exists in the database
+   - Check that all required fields are provided
+   - Verify the customer exists before attempting to update
 
 ### **Database Management**
 
@@ -374,6 +433,7 @@ powershell -ExecutionPolicy Bypass -File test-mutation.ps1
 - ✅ **SSL certificate handling for development**
 - ✅ **Added GraphQL mutations**
 - ✅ **Full CRUD operations via MVC**
+- ✅ **Update functionality for customers**
 
 ## 📄 License
 

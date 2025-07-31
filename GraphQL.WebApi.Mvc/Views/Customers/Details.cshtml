@@ -54,6 +54,9 @@
                         <a href="@Url.Action("Index", "Customers")" class="btn btn-secondary">
                             <i class="bi bi-arrow-left"></i> Back to List
                         </a>
+                        <a href="@Url.Action("Edit", "Customers", new { id = Model.Id })" class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Edit Customer
+                        </a>
                     </div>
                 </div>
             </div>

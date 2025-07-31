@@ -84,5 +84,60 @@ namespace GraphQL.WebApi.Mvc.Controllers
 
             return View(customer);
         }
+
+        // GET: Customers/Edit/5
+        public async Task<IActionResult> Edit(int id)
+        {
+            try
+            {
+                var customer = await _graphQLService.GetCustomerByIdAsync(id);
+                if (customer == null)
+                {
+                    return NotFound();
+                }
+                return View(customer);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching customer with id {Id} for editing", id);
+                ViewBag.ErrorMessage = "Unable to fetch customer for editing. Please try again later.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // POST: Customers/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Contact,Email,DateOfBirth")] Customer customer)
+        {
+            if (id != customer.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var updatedCustomer = await _graphQLService.UpdateCustomerAsync(customer);
+                    if (updatedCustomer != null)
+                    {
+                        TempData["SuccessMessage"] = "Customer updated successfully!";
+                        return RedirectToAction(nameof(Index));
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Failed to update customer. Please try again.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error updating customer with id {Id}", id);
+                    ModelState.AddModelError("", "An error occurred while updating the customer. Please try again.");
+                }
+            }
+
+            return View(customer);
+        }
     }
 } 

@@ -34,5 +34,38 @@ namespace GraphQL.WebApi.GraphQL
                 throw new Exception($"Error adding customer: {ex.Message}");
             }
         }
+
+        public async Task<Customer?> updateCustomer(
+            int id,
+            string firstName,
+            string lastName,
+            string contact,
+            string email,
+            DateTime dateOfBirth,
+            [Service] ApplicationDbContext context)
+        {
+            try
+            {
+                var customer = await context.Customers.FindAsync(id);
+                if (customer == null)
+                {
+                    throw new Exception($"Customer with id {id} not found");
+                }
+
+                customer.FirstName = firstName;
+                customer.LastName = lastName;
+                customer.Contact = contact;
+                customer.Email = email;
+                customer.DateOfBirth = dateOfBirth;
+
+                await context.SaveChangesAsync();
+
+                return customer;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error updating customer: {ex.Message}");
+            }
+        }
     }
 } 
