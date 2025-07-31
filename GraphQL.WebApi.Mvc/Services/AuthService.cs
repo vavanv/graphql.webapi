@@ -19,19 +19,30 @@ namespace GraphQL.WebApi.Mvc.Services
         {
             try
             {
-                // For now, we'll use hardcoded users since we don't have GraphQL queries for users yet
-                var validUsers = new Dictionary<string, string>
-                {
-                    { "admin", HashPassword("admin123") },
-                    { "user", HashPassword("user123") }
-                };
+                // Get user from database via GraphQL
+                var user = await _graphQLService.GetUserByUsernameAsync(username);
 
-                if (validUsers.ContainsKey(username))
+                if (user == null || !user.IsActive)
                 {
-                    return VerifyPassword(password, validUsers[username]);
+                    _logger.LogWarning("User {Username} not found or inactive", username);
+                    return false;
                 }
 
-                return false;
+                // Verify password
+                var isValid = VerifyPassword(password, user.PasswordHash);
+
+                if (isValid)
+                {
+                    _logger.LogInformation("User {Username} validated successfully", username);
+                    // Update last login time
+                    await _graphQLService.UpdateUserLastLoginAsync(user.Id);
+                }
+                else
+                {
+                    _logger.LogWarning("Invalid password for user {Username}", username);
+                }
+
+                return isValid;
             }
             catch (Exception ex)
             {
@@ -44,14 +55,19 @@ namespace GraphQL.WebApi.Mvc.Services
         {
             try
             {
-                // For now, return hardcoded user data
-                var users = new Dictionary<string, User>
-                {
-                    { "admin", new User { Id = 1, Username = "admin", Email = "admin@example.com", FirstName = "Admin", LastName = "User", IsActive = true } },
-                    { "user", new User { Id = 2, Username = "user", Email = "user@example.com", FirstName = "Regular", LastName = "User", IsActive = true } }
-                };
+                // Get user from database via GraphQL
+                var user = await _graphQLService.GetUserByUsernameAsync(username);
 
-                return users.ContainsKey(username) ? users[username] : null;
+                if (user != null)
+                {
+                    _logger.LogInformation("Retrieved user {Username} from database", username);
+                }
+                else
+                {
+                    _logger.LogWarning("User {Username} not found in database", username);
+                }
+
+                return user;
             }
             catch (Exception ex)
             {
@@ -64,9 +80,36 @@ namespace GraphQL.WebApi.Mvc.Services
         {
             try
             {
-                // For now, just return true as we don't have user registration in GraphQL yet
-                _logger.LogInformation("User registration attempted for {Username}", model.Username);
-                return true;
+                // Check if user already exists
+                var existingUser = await _graphQLService.GetUserByUsernameAsync(model.Username);
+                if (existingUser != null)
+                {
+                    _logger.LogWarning("User registration failed: Username {Username} already exists", model.Username);
+                    return false;
+                }
+
+                // Create new user
+                var newUser = new User
+                {
+                    Username = model.Username,
+                    Email = model.Email,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    IsActive = true
+                };
+
+                var createdUser = await _graphQLService.CreateUserAsync(newUser, model.Password);
+
+                if (createdUser != null)
+                {
+                    _logger.LogInformation("User {Username} registered successfully", model.Username);
+                    return true;
+                }
+                else
+                {
+                    _logger.LogError("Failed to create user {Username}", model.Username);
+                    return false;
+                }
             }
             catch (Exception ex)
             {
@@ -90,4 +133,4 @@ namespace GraphQL.WebApi.Mvc.Services
             return passwordHash == hash;
         }
     }
-} 
+}

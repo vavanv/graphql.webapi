@@ -19,17 +19,17 @@ namespace GraphQL.WebApi.Mvc.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login(string returnUrl = null)
+        public IActionResult Login(string? returnUrl = null)
         {
-            ViewData["ReturnUrl"] = returnUrl;
+            ViewData["ReturnUrl"] = returnUrl ?? string.Empty;
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
+        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
-            ViewData["ReturnUrl"] = returnUrl;
+            ViewData["ReturnUrl"] = returnUrl ?? string.Empty;
 
             if (ModelState.IsValid)
             {
@@ -121,4 +121,4 @@ namespace GraphQL.WebApi.Mvc.Controllers
             return View();
         }
     }
-} 
+}

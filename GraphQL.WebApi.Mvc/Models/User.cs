@@ -14,6 +14,9 @@ namespace GraphQL.WebApi.Mvc.Models
         [StringLength(100)]
         public string Email { get; set; } = string.Empty;
 
+        [StringLength(100)]
+        public string PasswordHash { get; set; } = string.Empty;
+
         [StringLength(50)]
         public string FirstName { get; set; } = string.Empty;
 
