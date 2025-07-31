@@ -1,5 +1,7 @@
 using GraphQL.WebApi.Model;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace GraphQL.WebApi.Data
 {
@@ -10,7 +12,38 @@ namespace GraphQL.WebApi.Data
             // Ensure database is created
             context.Database.EnsureCreated();
 
-            // Check if data already exists
+            // Seed users if they don't exist
+            if (!context.Users.Any())
+            {
+                var users = new User[]
+                {
+                    new User
+                    {
+                        Username = "admin",
+                        Email = "admin@example.com",
+                        PasswordHash = HashPassword("admin123"),
+                        FirstName = "Admin",
+                        LastName = "User",
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow
+                    },
+                    new User
+                    {
+                        Username = "user",
+                        Email = "user@example.com",
+                        PasswordHash = HashPassword("user123"),
+                        FirstName = "Regular",
+                        LastName = "User",
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow
+                    }
+                };
+
+                context.Users.AddRange(users);
+                context.SaveChanges();
+            }
+
+            // Check if customers already exist
             if (context.Customers.Any())
             {
                 return; // Database has been seeded
@@ -102,6 +135,15 @@ namespace GraphQL.WebApi.Data
 
             context.Customers.AddRange(customers);
             context.SaveChanges();
+        }
+
+        private static string HashPassword(string password)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                return Convert.ToBase64String(hashedBytes);
+            }
         }
     }
 }

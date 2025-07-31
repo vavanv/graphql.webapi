@@ -10,5 +10,6 @@ namespace GraphQL.WebApi.Data
         }
 
         public DbSet<Customer> Customers { get; set; } = null!;
+        public DbSet<User> Users { get; set; } = null!;
     }
 }

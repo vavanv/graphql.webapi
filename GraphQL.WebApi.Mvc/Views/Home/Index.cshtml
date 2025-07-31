@@ -6,30 +6,68 @@
     <h1 class="display-4">GraphQL Web API Demo</h1>
     <p class="lead">A modern GraphQL API with ASP.NET Core 8 and HotChocolate</p>
     
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">GraphQL API</h5>
-                    <p class="card-text">Access the GraphQL API directly</p>
-                    <a href="https://localhost:5001/graphql/" target="_blank" class="btn btn-primary">
-                        <i class="bi bi-graph-up"></i> Banana Cake Pop IDE
-                    </a>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="alert alert-success" role="alert">
+            <i class="bi bi-person-check"></i> Welcome back, <strong>@ViewBag.UserFullName</strong>!
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">GraphQL API</h5>
+                        <p class="card-text">Access the GraphQL API directly</p>
+                        <a href="https://localhost:5001/graphql/" target="_blank" class="btn btn-primary">
+                            <i class="bi bi-graph-up"></i> Banana Cake Pop IDE
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Customers</h5>
+                        <p class="card-text">View and manage customers</p>
+                        <a href="@Url.Action("Index", "Customers")" class="btn btn-success">
+                            <i class="bi bi-people"></i> View Customers
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Customers</h5>
-                    <p class="card-text">View customers through the MVC interface</p>
-                    <a href="@Url.Action("Index", "Customers")" class="btn btn-success">
-                        <i class="bi bi-people"></i> View Customers
-                    </a>
+    }
+    else
+    {
+        <div class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> Please log in to access customer management features.
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">GraphQL API</h5>
+                        <p class="card-text">Access the GraphQL API directly</p>
+                        <a href="https://localhost:5001/graphql/" target="_blank" class="btn btn-primary">
+                            <i class="bi bi-graph-up"></i> Banana Cake Pop IDE
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Login Required</h5>
+                        <p class="card-text">Log in to access customer management</p>
+                        <a href="@Url.Action("Login", "Account")" class="btn btn-warning">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    }
     
     <div class="row mt-4">
         <div class="col-md-12">

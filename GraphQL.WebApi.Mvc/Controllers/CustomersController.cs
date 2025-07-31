@@ -1,9 +1,12 @@
 using GraphQL.WebApi.Mvc.Models;
 using GraphQL.WebApi.Mvc.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace GraphQL.WebApi.Mvc.Controllers
 {
+    [Authorize]
     public class CustomersController : Controller
     {
         private readonly IGraphQLService _graphQLService;
@@ -110,8 +113,15 @@ namespace GraphQL.WebApi.Mvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Contact,Email,DateOfBirth")] Customer customer)
         {
+            _logger.LogInformation("Edit request received for customer ID: {Id}, ModelState.IsValid: {IsValid}", id, ModelState.IsValid);
+
             if (id != customer.Id)
             {
+                _logger.LogWarning("ID mismatch: URL ID {UrlId} != Customer ID {CustomerId}", id, customer.Id);
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = "Invalid customer ID." });
+                }
                 return NotFound();
             }
 
@@ -119,25 +129,74 @@ namespace GraphQL.WebApi.Mvc.Controllers
             {
                 try
                 {
+                    _logger.LogInformation("Attempting to update customer: {Customer}", JsonSerializer.Serialize(customer));
                     var updatedCustomer = await _graphQLService.UpdateCustomerAsync(customer);
+
                     if (updatedCustomer != null)
                     {
-                        TempData["SuccessMessage"] = "Customer updated successfully!";
-                        return RedirectToAction(nameof(Index));
+                        _logger.LogInformation("Customer updated successfully: {UpdatedCustomer}", JsonSerializer.Serialize(updatedCustomer));
+                        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        {
+                            // AJAX request - return JSON
+                            return Json(new { success = true, message = "Customer updated successfully!" });
+                        }
+                        else
+                        {
+                            // Regular form submission
+                            TempData["SuccessMessage"] = "Customer updated successfully!";
+                            return RedirectToAction(nameof(Index));
+                        }
                     }
                     else
                     {
-                        ModelState.AddModelError("", "Failed to update customer. Please try again.");
+                        _logger.LogWarning("GraphQL service returned null for customer update");
+                        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        {
+                            return Json(new { success = false, message = "Failed to update customer. The GraphQL service returned null." });
+                        }
+                        else
+                        {
+                            ModelState.AddModelError("", "Failed to update customer. Please try again.");
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error updating customer with id {Id}", id);
-                    ModelState.AddModelError("", "An error occurred while updating the customer. Please try again.");
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Json(new { success = false, message = $"An error occurred while updating the customer: {ex.Message}" });
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "An error occurred while updating the customer. Please try again.");
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                var errorMessage = string.Join(", ", errors);
+                _logger.LogWarning("ModelState validation failed: {Errors}", errorMessage);
+
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = $"Validation errors: {errorMessage}" });
+                }
+                else
+                {
+                    return View(customer);
                 }
             }
 
-            return View(customer);
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return Json(new { success = false, message = "Invalid data. Please check your input." });
+            }
+            else
+            {
+                return View(customer);
+            }
         }
     }
-} 
+}

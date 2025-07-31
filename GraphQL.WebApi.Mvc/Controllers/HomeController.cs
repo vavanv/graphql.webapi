@@ -15,6 +15,11 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            ViewBag.UserName = User.Identity.Name;
+            ViewBag.UserFullName = $"{User.FindFirst("FirstName")?.Value} {User.FindFirst("LastName")?.Value}";
+        }
         return View();
     }
 
