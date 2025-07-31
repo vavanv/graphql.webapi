@@ -6,16 +6,28 @@ namespace GraphQL.WebApi.GraphQL
 {
     public class Query
     {
-        [UseDbContext(typeof(ApplicationDbContext))]
-        public IQueryable<Customer> GetCustomers([Service] ApplicationDbContext context)
+        public IQueryable<Customer> customers([Service] ApplicationDbContext context)
         {
-            return context.Customers;
+            try
+            {
+                return context.Customers.AsQueryable();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error accessing customers: {ex.Message}");
+            }
         }
 
-        [UseDbContext(typeof(ApplicationDbContext))]
-        public async Task<Customer?> GetCustomer(int id, [Service] ApplicationDbContext context)
+        public async Task<Customer?> customer(int id, [Service] ApplicationDbContext context)
         {
-            return await context.Customers.FirstOrDefaultAsync(c => c.Id == id);
+            try
+            {
+                return await context.Customers.FirstOrDefaultAsync(c => c.Id == id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error accessing customer with id {id}: {ex.Message}");
+            }
         }
     }
 }

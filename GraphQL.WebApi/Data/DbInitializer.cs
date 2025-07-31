@@ -1,0 +1,107 @@
+using GraphQL.WebApi.Model;
+using Microsoft.EntityFrameworkCore;
+
+namespace GraphQL.WebApi.Data
+{
+    public static class DbInitializer
+    {
+        public static void Initialize(ApplicationDbContext context)
+        {
+            // Ensure database is created
+            context.Database.EnsureCreated();
+
+            // Check if data already exists
+            if (context.Customers.Any())
+            {
+                return; // Database has been seeded
+            }
+
+            var customers = new Customer[]
+            {
+                new Customer
+                {
+                    FirstName = "John",
+                    LastName = "Doe",
+                    Contact = "+1-555-0101",
+                    Email = "john.doe@email.com",
+                    DateOfBirth = new DateTime(1985, 3, 15)
+                },
+                new Customer
+                {
+                    FirstName = "Jane",
+                    LastName = "Smith",
+                    Contact = "+1-555-0102",
+                    Email = "jane.smith@email.com",
+                    DateOfBirth = new DateTime(1990, 7, 22)
+                },
+                new Customer
+                {
+                    FirstName = "Michael",
+                    LastName = "Johnson",
+                    Contact = "+1-555-0103",
+                    Email = "michael.johnson@email.com",
+                    DateOfBirth = new DateTime(1982, 11, 8)
+                },
+                new Customer
+                {
+                    FirstName = "Sarah",
+                    LastName = "Williams",
+                    Contact = "+1-555-0104",
+                    Email = "sarah.williams@email.com",
+                    DateOfBirth = new DateTime(1988, 4, 12)
+                },
+                new Customer
+                {
+                    FirstName = "David",
+                    LastName = "Brown",
+                    Contact = "+1-555-0105",
+                    Email = "david.brown@email.com",
+                    DateOfBirth = new DateTime(1995, 9, 30)
+                },
+                new Customer
+                {
+                    FirstName = "Emily",
+                    LastName = "Davis",
+                    Contact = "+1-555-0106",
+                    Email = "emily.davis@email.com",
+                    DateOfBirth = new DateTime(1992, 1, 18)
+                },
+                new Customer
+                {
+                    FirstName = "Robert",
+                    LastName = "Wilson",
+                    Contact = "+1-555-0107",
+                    Email = "robert.wilson@email.com",
+                    DateOfBirth = new DateTime(1987, 6, 25)
+                },
+                new Customer
+                {
+                    FirstName = "Lisa",
+                    LastName = "Anderson",
+                    Contact = "+1-555-0108",
+                    Email = "lisa.anderson@email.com",
+                    DateOfBirth = new DateTime(1993, 12, 3)
+                },
+                new Customer
+                {
+                    FirstName = "James",
+                    LastName = "Taylor",
+                    Contact = "+1-555-0109",
+                    Email = "james.taylor@email.com",
+                    DateOfBirth = new DateTime(1980, 8, 14)
+                },
+                new Customer
+                {
+                    FirstName = "Amanda",
+                    LastName = "Martinez",
+                    Contact = "+1-555-0110",
+                    Email = "amanda.martinez@email.com",
+                    DateOfBirth = new DateTime(1991, 2, 28)
+                }
+            };
+
+            context.Customers.AddRange(customers);
+            context.SaveChanges();
+        }
+    }
+}

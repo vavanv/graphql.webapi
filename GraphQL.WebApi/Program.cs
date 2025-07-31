@@ -13,13 +13,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services
     .AddGraphQLServer()
     .AddQueryType<Query>()
-    .AddProjections()
-    .AddFiltering()
-    .AddSorting();
+    .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = true);
 
 builder.Services.AddControllers();
 
 var app = builder.Build();
+
+// Initialize database with sample data
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    DbInitializer.Initialize(context);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
