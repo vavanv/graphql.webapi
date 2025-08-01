@@ -33,6 +33,7 @@ builder.Services.AddAuthorization();
 
 // Add custom services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 var app = builder.Build();
 

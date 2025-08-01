@@ -9,12 +9,12 @@ namespace GraphQL.WebApi.Mvc.Controllers
     [Authorize]
     public class CustomersController : Controller
     {
-        private readonly IGraphQLService _graphQLService;
+        private readonly ICustomerService _customerService;
         private readonly ILogger<CustomersController> _logger;
 
-        public CustomersController(IGraphQLService graphQLService, ILogger<CustomersController> logger)
+        public CustomersController(ICustomerService customerService, ILogger<CustomersController> logger)
         {
-            _graphQLService = graphQLService;
+            _customerService = customerService;
             _logger = logger;
         }
 
@@ -22,7 +22,7 @@ namespace GraphQL.WebApi.Mvc.Controllers
         {
             try
             {
-                var customers = await _graphQLService.GetCustomersAsync();
+                var customers = await _customerService.GetCustomersAsync();
                 return View(customers);
             }
             catch (Exception ex)
@@ -37,7 +37,7 @@ namespace GraphQL.WebApi.Mvc.Controllers
         {
             try
             {
-                var customer = await _graphQLService.GetCustomerByIdAsync(id);
+                var customer = await _customerService.GetCustomerByIdAsync(id);
                 if (customer == null)
                 {
                     return NotFound();
@@ -67,7 +67,7 @@ namespace GraphQL.WebApi.Mvc.Controllers
             {
                 try
                 {
-                    var createdCustomer = await _graphQLService.CreateCustomerAsync(customer);
+                    var createdCustomer = await _customerService.CreateCustomerAsync(customer);
                     if (createdCustomer != null)
                     {
                         TempData["SuccessMessage"] = "Customer created successfully!";
@@ -93,7 +93,7 @@ namespace GraphQL.WebApi.Mvc.Controllers
         {
             try
             {
-                var customer = await _graphQLService.GetCustomerByIdAsync(id);
+                var customer = await _customerService.GetCustomerByIdAsync(id);
                 if (customer == null)
                 {
                     return NotFound();
@@ -130,7 +130,7 @@ namespace GraphQL.WebApi.Mvc.Controllers
                 try
                 {
                     _logger.LogInformation("Attempting to update customer: {Customer}", JsonSerializer.Serialize(customer));
-                    var updatedCustomer = await _graphQLService.UpdateCustomerAsync(customer);
+                    var updatedCustomer = await _customerService.UpdateCustomerAsync(customer);
 
                     if (updatedCustomer != null)
                     {

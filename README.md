@@ -11,8 +11,11 @@ A modern GraphQL API built with **ASP.NET Core 8** and **HotChocolate GraphQL** 
 - **Banana Cake Pop**: Built-in GraphQL IDE for testing
 - **MVC Web Application**: User-friendly web interface for data visualization
 - **Full CRUD Operations**: Create, Read, Update, Delete customers
+- **User Authentication & Authorization**: Cookie-based authentication with protected routes
+- **Service Layer Architecture**: Clean separation of concerns with dedicated service interfaces
 - **Nullable Reference Types**: Better null safety throughout
 - **Auto Database Seeding**: Sample data automatically populated on startup
+- **Enhanced Logging**: Comprehensive logging throughout the application
 
 ## 📋 Prerequisites
 
@@ -202,6 +205,90 @@ mutation (
 }
 ```
 
+### 5. **User Management Queries**
+
+```graphql
+# Get all users
+query {
+  users {
+    id
+    username
+    email
+    firstName
+    lastName
+    isActive
+    createdAt
+    lastLoginAt
+  }
+}
+
+# Get user by username
+query {
+  user(username: "admin") {
+    id
+    username
+    email
+    firstName
+    lastName
+    isActive
+    createdAt
+    lastLoginAt
+  }
+}
+
+# Get user by ID
+query {
+  userById(id: 1) {
+    id
+    username
+    email
+    firstName
+    lastName
+    isActive
+    createdAt
+    lastLoginAt
+  }
+}
+```
+
+### 6. **User Management Mutations**
+
+```graphql
+# Create new user
+mutation (
+  $username: String!
+  $email: String!
+  $password: String!
+  $firstName: String!
+  $lastName: String!
+) {
+  addUser(
+    username: $username
+    email: $email
+    password: $password
+    firstName: $firstName
+    lastName: $lastName
+  ) {
+    id
+    username
+    email
+    firstName
+    lastName
+    isActive
+    createdAt
+  }
+}
+
+# Update user last login
+mutation {
+  updateUserLastLogin(id: 1) {
+    id
+    username
+    lastLoginAt
+  }
+}
+```
+
 ## 🗄️ Database
 
 ### **Connection Details**
@@ -212,14 +299,23 @@ mutation (
 
 ### **Sample Data**
 
-The application automatically seeds the database with 10 sample customers on startup:
+The application automatically seeds the database with sample data on startup:
+
+**Customers (12 sample records):**
 
 - John Doe, Jane Smith, Michael Johnson, Sarah Williams, David Brown
 - Emily Davis, Robert Wilson, Lisa Anderson, James Taylor, Amanda Martinez
+- Plus additional customers for testing
+
+**Users (2 demo accounts):**
+
+- **Admin**: `admin` / `admin123`
+- **User**: `user` / `user123`
 
 ### **Database Schema**
 
 ```sql
+-- Customers Table
 CREATE TABLE [Customers] (
     [Id] int NOT NULL IDENTITY,
     [FirstName] nvarchar(max) NOT NULL,
@@ -228,6 +324,20 @@ CREATE TABLE [Customers] (
     [Email] nvarchar(max) NOT NULL,
     [DateOfBirth] datetime2 NOT NULL,
     CONSTRAINT [PK_Customers] PRIMARY KEY ([Id])
+);
+
+-- Users Table
+CREATE TABLE [Users] (
+    [Id] int NOT NULL IDENTITY,
+    [Username] nvarchar(50) NOT NULL,
+    [Email] nvarchar(100) NOT NULL,
+    [PasswordHash] nvarchar(100) NOT NULL,
+    [FirstName] nvarchar(50) NOT NULL,
+    [LastName] nvarchar(50) NOT NULL,
+    [IsActive] bit NOT NULL DEFAULT 1,
+    [CreatedAt] datetime2 NOT NULL DEFAULT GETDATE(),
+    [LastLoginAt] datetime2 NULL,
+    CONSTRAINT [PK_Users] PRIMARY KEY ([Id])
 );
 ```
 
@@ -243,34 +353,67 @@ GraphQL.WebApi/
 │   │   ├── Query.cs                  # GraphQL queries
 │   │   └── Mutation.cs               # GraphQL mutations
 │   ├── Model/
-│   │   └── Customer.cs               # Customer entity
+│   │   ├── Customer.cs               # Customer entity
+│   │   └── User.cs                   # User entity
 │   ├── Program.cs                    # Application entry point
 │   ├── appsettings.json              # Configuration
 │   └── seed-data.sql                 # Manual SQL seeding script
 ├── GraphQL.WebApi.Mvc/           # MVC Web Application
 │   ├── Controllers/
 │   │   ├── HomeController.cs         # Home page controller
-│   │   └── CustomersController.cs    # Customer operations (CRUD)
+│   │   ├── CustomersController.cs    # Customer operations (CRUD)
+│   │   └── AccountController.cs      # Authentication controller
 │   ├── Models/
-│   │   └── Customer.cs               # Customer model
+│   │   ├── Customer.cs               # Customer model
+│   │   └── User.cs                   # User and auth models
 │   ├── Services/
 │   │   ├── IGraphQLService.cs        # GraphQL service interface
-│   │   └── GraphQLService.cs         # GraphQL client implementation
+│   │   ├── GraphQLService.cs         # GraphQL client implementation
+│   │   ├── ICustomerService.cs       # Customer service interface
+│   │   ├── CustomerService.cs        # Customer service implementation
+│   │   ├── IAuthService.cs           # Authentication service interface
+│   │   └── AuthService.cs            # Authentication service implementation
 │   ├── Views/
 │   │   ├── Home/
 │   │   │   └── Index.cshtml          # Home page
+│   │   ├── Account/
+│   │   │   ├── Login.cshtml          # Login form
+│   │   │   └── Register.cshtml       # Registration form
 │   │   └── Customers/
-│   │       ├── Index.cshtml          # Customer list
-│   │       ├── Details.cshtml        # Customer details
-│   │       ├── Create.cshtml         # Create customer form
-│   │       └── Edit.cshtml           # Edit customer form
+│   │       ├── Index.cshtml          # Customer list with modals
+│   │       └── Create.cshtml         # Create customer form
 │   └── Program.cs                    # MVC application entry point
 └── GraphQL.WebApi.sln             # Solution file
 ```
 
-## 🔧 Configuration
+## 🏗️ Architecture
 
-### **Database Connection**
+### **Service Layer Pattern**
+
+The MVC application follows a clean service layer architecture:
+
+```
+Controllers → Service Interfaces → Service Implementations → GraphQL API
+```
+
+**Key Components:**
+
+- **`ICustomerService`**: Business logic for customer operations
+- **`CustomerService`**: Implementation that wraps `IGraphQLService` calls
+- **`IAuthService`**: Authentication and user management
+- **`AuthService`**: Implementation with database-backed user validation
+- **`IGraphQLService`**: Low-level GraphQL client interface
+- **`GraphQLService`**: HTTP client implementation for GraphQL API communication
+
+**Benefits:**
+
+- ✅ **Separation of Concerns**: Controllers focus on HTTP, services handle business logic
+- ✅ **Testability**: Easy to mock service interfaces for unit testing
+- ✅ **Maintainability**: Clear boundaries between layers
+- ✅ **Logging**: Enhanced logging at service layer for better debugging
+- ✅ **Flexibility**: Can easily swap implementations without changing controllers
+
+## 🔧 Configuration
 
 ```json
 {
@@ -290,9 +433,10 @@ builder.Services
     .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = true);
 ```
 
-### **MVC GraphQL Client Configuration**
+### **MVC Service Layer Configuration**
 
 ```csharp
+// GraphQL Client Configuration
 builder.Services.AddHttpClient<IGraphQLService, GraphQLService>(client =>
 {
     client.BaseAddress = new Uri("https://localhost:5001/graphql");
@@ -302,6 +446,23 @@ builder.Services.AddHttpClient<IGraphQLService, GraphQLService>(client =>
 {
     ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
 });
+
+// Service Layer Registration
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+
+// Authentication Configuration
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.SlidingExpiration = true;
+    });
+
+builder.Services.AddAuthorization();
 ```
 
 ## 🧪 Testing
@@ -315,10 +476,14 @@ builder.Services.AddHttpClient<IGraphQLService, GraphQLService>(client =>
 ### **Using MVC Web Application**
 
 1. Navigate to `https://localhost:5231`
-2. Click on "Customers" in the navigation
-3. View customer list and details
-4. Click "Create New Customer" to add new customers
-5. Click the edit button (pencil icon) to modify existing customers
+2. **Login** with demo credentials:
+   - Username: `admin` / Password: `admin123`
+   - Or Username: `user` / Password: `user123`
+3. Click on "Customers" in the navigation
+4. View customer list with modal dialogs for details and editing
+5. Click "Create New Customer" to add new customers
+6. Click the "View Details" or "Edit" buttons to use modal dialogs
+7. Use the "Logout" link to sign out
 
 ### **Using curl**
 
@@ -434,6 +599,12 @@ powershell -ExecutionPolicy Bypass -File test-update.ps1
 - ✅ **Added GraphQL mutations**
 - ✅ **Full CRUD operations via MVC**
 - ✅ **Update functionality for customers**
+- ✅ **User authentication and authorization**
+- ✅ **Service layer architecture with ICustomerService**
+- ✅ **Enhanced logging throughout the application**
+- ✅ **Modal dialogs for better UX**
+- ✅ **Cookie-based authentication system**
+- ✅ **Protected routes and authorization**
 
 ## 📄 License
 
