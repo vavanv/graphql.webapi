@@ -9,4 +9,4 @@ namespace GraphQL.WebApi.Mvc.Services
         Task<Customer?> CreateCustomerAsync(Customer customer);
         Task<Customer?> UpdateCustomerAsync(Customer customer);
     }
-} 
+}

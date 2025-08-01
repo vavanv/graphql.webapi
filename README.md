@@ -12,10 +12,14 @@ A modern GraphQL API built with **ASP.NET Core 8** and **HotChocolate GraphQL** 
 - **MVC Web Application**: User-friendly web interface for data visualization
 - **Full CRUD Operations**: Create, Read, Update, Delete customers
 - **User Authentication & Authorization**: Cookie-based authentication with protected routes
-- **Service Layer Architecture**: Clean separation of concerns with dedicated service interfaces
+- **Clean Architecture**: Separated service layer with dedicated interfaces per entity
+- **Common GraphQL Client**: Reusable HTTP client for GraphQL communication
+- **Single Responsibility Principle**: Each service handles one specific domain
 - **Nullable Reference Types**: Better null safety throughout
 - **Auto Database Seeding**: Sample data automatically populated on startup
 - **Enhanced Logging**: Comprehensive logging throughout the application
+- **Organized Service Layer**: Services organized by domain (Auth, Customer, User, GraphQL)
+- **Resolved Namespace Conflicts**: Clean service organization with proper type resolution
 
 ## 📋 Prerequisites
 
@@ -31,6 +35,56 @@ A modern GraphQL API built with **ASP.NET Core 8** and **HotChocolate GraphQL** 
 - **SQL Server LocalDB**
 - **Banana Cake Pop IDE**
 - **ASP.NET Core MVC**
+
+## 🏗️ Project Structure
+
+### GraphQL API (`GraphQL.WebApi/`)
+
+```
+GraphQL.WebApi/
+├── Data/
+│   └── ApplicationDbContext.cs
+├── GraphQL/
+│   ├── DemoSchema.cs
+│   ├── Queries/
+│   │   └── CustomerQuery.cs
+│   └── Types/
+│       └── CustomerGraphType.cs
+├── Model/
+│   └── Customer.cs
+├── Migrations/
+├── Program.cs
+└── appsettings.json
+```
+
+### MVC Application (`GraphQL.WebApi.Mvc/`)
+
+```
+GraphQL.WebApi.Mvc/
+├── Controllers/
+│   ├── AccountController.cs
+│   ├── CustomersController.cs
+│   └── HomeController.cs
+├── Models/
+│   ├── Customer.cs
+│   └── User.cs (includes LoginViewModel, RegisterViewModel)
+├── Services/
+│   ├── Auth/
+│   │   ├── IAuthService.cs
+│   │   └── AuthService.cs
+│   ├── Customer/
+│   │   ├── ICustomerService.cs
+│   │   └── CustomerService.cs
+│   ├── GraphQL/
+│   │   ├── IGraphQLClient.cs
+│   │   └── GraphQLClient.cs
+│   └── User/
+│       ├── IUserService.cs
+│       └── UserService.cs
+├── Views/
+├── Program.cs
+└── appsettings.json
+```
 
 ## 🚀 Getting Started
 
@@ -90,7 +144,39 @@ The MVC application will start on:
 
 - **URL**: `https://localhost:5231`
 - **Purpose**: User-friendly web interface
-- **Features**: Customer list, customer details, create new customers, edit customers
+- **Features**:
+  - Customer management (list, details, create, edit)
+  - User authentication (login, register, logout)
+  - Protected routes with authorization
+  - AJAX-powered customer updates
+
+## 🔧 Service Layer Architecture
+
+The MVC application uses a clean service layer architecture:
+
+### **Authentication Service**
+
+- **Interface**: `IAuthService`
+- **Implementation**: `AuthService`
+- **Responsibilities**: User validation, registration, password hashing
+
+### **Customer Service**
+
+- **Interface**: `ICustomerService`
+- **Implementation**: `CustomerService`
+- **Responsibilities**: Customer CRUD operations via GraphQL
+
+### **User Service**
+
+- **Interface**: `IUserService`
+- **Implementation**: `UserService`
+- **Responsibilities**: User management via GraphQL
+
+### **GraphQL Client**
+
+- **Interface**: `IGraphQLClient`
+- **Implementation**: `GraphQLClient`
+- **Responsibilities**: HTTP communication with GraphQL API
 
 ## 📊 Available Queries and Mutations
 
@@ -341,77 +427,41 @@ CREATE TABLE [Users] (
 );
 ```
 
-## 🏗️ Project Structure
-
-```
-GraphQL.WebApi/
-├── GraphQL.WebApi/              # GraphQL API Project
-│   ├── Data/
-│   │   ├── ApplicationDbContext.cs    # EF Core DbContext
-│   │   └── DbInitializer.cs          # Database seeding
-│   ├── GraphQL/
-│   │   ├── Query.cs                  # GraphQL queries
-│   │   └── Mutation.cs               # GraphQL mutations
-│   ├── Model/
-│   │   ├── Customer.cs               # Customer entity
-│   │   └── User.cs                   # User entity
-│   ├── Program.cs                    # Application entry point
-│   ├── appsettings.json              # Configuration
-│   └── seed-data.sql                 # Manual SQL seeding script
-├── GraphQL.WebApi.Mvc/           # MVC Web Application
-│   ├── Controllers/
-│   │   ├── HomeController.cs         # Home page controller
-│   │   ├── CustomersController.cs    # Customer operations (CRUD)
-│   │   └── AccountController.cs      # Authentication controller
-│   ├── Models/
-│   │   ├── Customer.cs               # Customer model
-│   │   └── User.cs                   # User and auth models
-│   ├── Services/
-│   │   ├── IGraphQLService.cs        # GraphQL service interface
-│   │   ├── GraphQLService.cs         # GraphQL client implementation
-│   │   ├── ICustomerService.cs       # Customer service interface
-│   │   ├── CustomerService.cs        # Customer service implementation
-│   │   ├── IAuthService.cs           # Authentication service interface
-│   │   └── AuthService.cs            # Authentication service implementation
-│   ├── Views/
-│   │   ├── Home/
-│   │   │   └── Index.cshtml          # Home page
-│   │   ├── Account/
-│   │   │   ├── Login.cshtml          # Login form
-│   │   │   └── Register.cshtml       # Registration form
-│   │   └── Customers/
-│   │       ├── Index.cshtml          # Customer list with modals
-│   │       └── Create.cshtml         # Create customer form
-│   └── Program.cs                    # MVC application entry point
-└── GraphQL.WebApi.sln             # Solution file
-```
-
 ## 🏗️ Architecture
 
-### **Service Layer Pattern**
+### **Clean Architecture Pattern**
 
-The MVC application follows a clean service layer architecture:
+The MVC application follows a clean architecture with separated concerns:
 
 ```
-Controllers → Service Interfaces → Service Implementations → GraphQL API
+Controllers → Service Interfaces → Service Implementations → Common GraphQL Client → GraphQL API
 ```
 
 **Key Components:**
 
-- **`ICustomerService`**: Business logic for customer operations
-- **`CustomerService`**: Implementation that wraps `IGraphQLService` calls
-- **`IAuthService`**: Authentication and user management
-- **`AuthService`**: Implementation with database-backed user validation
-- **`IGraphQLService`**: Low-level GraphQL client interface
-- **`GraphQLService`**: HTTP client implementation for GraphQL API communication
+#### **Common GraphQL Client Layer:**
 
-**Benefits:**
+- **`IGraphQLClient`**: Common interface for GraphQL HTTP communication
+- **`GraphQLClient`**: HTTP client implementation with JSON serialization
 
-- ✅ **Separation of Concerns**: Controllers focus on HTTP, services handle business logic
-- ✅ **Testability**: Easy to mock service interfaces for unit testing
-- ✅ **Maintainability**: Clear boundaries between layers
-- ✅ **Logging**: Enhanced logging at service layer for better debugging
-- ✅ **Flexibility**: Can easily swap implementations without changing controllers
+#### **Entity-Specific Service Layer:**
+
+- **`ICustomerService`**: Customer business logic interface
+- **`CustomerService`**: Customer operations (CRUD, validation, logging)
+- **`IUserService`**: User business logic interface
+- **`UserService`**: User operations (CRUD, authentication data)
+- **`IAuthService`**: Authentication logic interface
+- **`AuthService`**: Authentication, password hashing, user validation
+
+#### **Architecture Benefits:**
+
+- ✅ **Single Responsibility**: Each service handles one specific domain
+- ✅ **Separation of Concerns**: Clear boundaries between layers
+- ✅ **Testability**: Easy to mock interfaces for unit testing
+- ✅ **Maintainability**: Changes in one service don't affect others
+- ✅ **Reusability**: Common GraphQL client used by all services
+- ✅ **Scalability**: Easy to add new entities with dedicated services
+- ✅ **Logging**: Enhanced logging at each service layer
 
 ## 🔧 Configuration
 
@@ -433,11 +483,11 @@ builder.Services
     .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = true);
 ```
 
-### **MVC Service Layer Configuration**
+### **MVC Clean Architecture Configuration**
 
 ```csharp
-// GraphQL Client Configuration
-builder.Services.AddHttpClient<IGraphQLService, GraphQLService>(client =>
+// Common GraphQL Client Configuration
+builder.Services.AddHttpClient<IGraphQLClient, GraphQLClient>(client =>
 {
     client.BaseAddress = new Uri("https://localhost:5001/graphql");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
@@ -447,9 +497,10 @@ builder.Services.AddHttpClient<IGraphQLService, GraphQLService>(client =>
     ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
 });
 
-// Service Layer Registration
-builder.Services.AddScoped<IAuthService, AuthService>();
+// Entity-Specific Service Registration
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Authentication Configuration
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -600,11 +651,131 @@ powershell -ExecutionPolicy Bypass -File test-update.ps1
 - ✅ **Full CRUD operations via MVC**
 - ✅ **Update functionality for customers**
 - ✅ **User authentication and authorization**
-- ✅ **Service layer architecture with ICustomerService**
+- ✅ **Clean architecture with separated services**
+- ✅ **Common GraphQL client for reusability**
+- ✅ **Single responsibility principle implementation**
 - ✅ **Enhanced logging throughout the application**
 - ✅ **Modal dialogs for better UX**
 - ✅ **Cookie-based authentication system**
 - ✅ **Protected routes and authorization**
+
+## 🔄 Recent Architecture Refactoring
+
+### **Before (Monolithic Service):**
+
+```csharp
+// Single GraphQLService handling all entities
+public class GraphQLService : IGraphQLService
+{
+    // Customer methods
+    public async Task<List<Customer>> GetCustomersAsync() { ... }
+    public async Task<Customer?> CreateCustomerAsync(Customer customer) { ... }
+
+    // User methods
+    public async Task<List<User>> GetUsersAsync() { ... }
+    public async Task<User?> CreateUserAsync(User user, string password) { ... }
+
+    // Mixed responsibilities in one class
+}
+```
+
+### **After (Clean Architecture):**
+
+```csharp
+// Common GraphQL Client
+public interface IGraphQLClient
+{
+    Task<GraphQLResponse?> ExecuteQueryAsync(string query, object? variables = null);
+}
+
+// Entity-specific services
+public interface ICustomerService
+{
+    Task<List<Customer>> GetCustomersAsync();
+    Task<Customer?> CreateCustomerAsync(Customer customer);
+}
+
+public interface IUserService
+{
+    Task<List<User>> GetUsersAsync();
+    Task<User?> CreateUserAsync(User user, string password);
+}
+
+public interface IAuthService
+{
+    Task<bool> ValidateUserAsync(string username, string password);
+}
+```
+
+### **Benefits of Refactoring:**
+
+- **🎯 Single Responsibility**: Each service handles one domain
+- **🧪 Better Testing**: Easy to mock individual services
+- **🔧 Maintainability**: Changes in one service don't affect others
+- **📈 Scalability**: Easy to add new entities with dedicated services
+- **♻️ Reusability**: Common GraphQL client used by all services
+- **📝 Enhanced Logging**: Specific logging per service layer
+
+## 🏗️ Service Organization Improvements
+
+### **Namespace Conflict Resolution**
+
+The project recently underwent a significant refactoring to resolve namespace conflicts and improve service organization:
+
+#### **Problem:**
+
+```csharp
+// Namespace conflicts when services were organized in subfolders
+namespace GraphQL.WebApi.Mvc.Services.Customer
+{
+    public interface ICustomerService
+    {
+        Task<List<Customer>> GetCustomersAsync(); // Error: 'Customer' is a namespace
+    }
+}
+```
+
+#### **Solution:**
+
+```csharp
+// Consolidated all services under a single namespace
+namespace GraphQL.WebApi.Mvc.Services
+{
+    public interface ICustomerService
+    {
+        Task<List<Customer>> GetCustomersAsync(); // Clean resolution
+    }
+}
+```
+
+### **Service Layer Organization**
+
+The services are now organized by domain while maintaining clean type resolution:
+
+```
+Services/
+├── Auth/
+│   ├── IAuthService.cs      # Authentication interface
+│   └── AuthService.cs       # Authentication implementation
+├── Customer/
+│   ├── ICustomerService.cs  # Customer interface
+│   └── CustomerService.cs   # Customer implementation
+├── GraphQL/
+│   ├── IGraphQLClient.cs    # GraphQL client interface
+│   └── GraphQLClient.cs     # GraphQL client implementation
+└── User/
+    ├── IUserService.cs      # User interface
+    └── UserService.cs       # User implementation
+```
+
+### **Key Improvements:**
+
+- **🔧 Resolved Namespace Conflicts**: All services now use clean type resolution
+- **📁 Organized File Structure**: Services grouped by domain in subfolders
+- **🎯 Single Namespace**: All services under `GraphQL.WebApi.Mvc.Services`
+- **✅ Successful Build**: No more compilation errors
+- **🧹 Clean Architecture**: Maintained separation of concerns
+- **📝 Type Safety**: Proper type resolution throughout the application
 
 ## 📄 License
 

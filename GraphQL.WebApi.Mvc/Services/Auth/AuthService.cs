@@ -6,12 +6,12 @@ namespace GraphQL.WebApi.Mvc.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly IGraphQLService _graphQLService;
+        private readonly IUserService _userService;
         private readonly ILogger<AuthService> _logger;
 
-        public AuthService(IGraphQLService graphQLService, ILogger<AuthService> logger)
+        public AuthService(IUserService userService, ILogger<AuthService> logger)
         {
-            _graphQLService = graphQLService;
+            _userService = userService;
             _logger = logger;
         }
 
@@ -20,7 +20,7 @@ namespace GraphQL.WebApi.Mvc.Services
             try
             {
                 // Get user from database via GraphQL
-                var user = await _graphQLService.GetUserByUsernameAsync(username);
+                var user = await _userService.GetUserByUsernameAsync(username);
 
                 if (user == null || !user.IsActive)
                 {
@@ -35,7 +35,7 @@ namespace GraphQL.WebApi.Mvc.Services
                 {
                     _logger.LogInformation("User {Username} validated successfully", username);
                     // Update last login time
-                    await _graphQLService.UpdateUserLastLoginAsync(user.Id);
+                    await _userService.UpdateUserLastLoginAsync(user.Id);
                 }
                 else
                 {
@@ -51,12 +51,12 @@ namespace GraphQL.WebApi.Mvc.Services
             }
         }
 
-        public async Task<User?> GetUserByUsernameAsync(string username)
+        public async Task<GraphQL.WebApi.Mvc.Models.User?> GetUserByUsernameAsync(string username)
         {
             try
             {
                 // Get user from database via GraphQL
-                var user = await _graphQLService.GetUserByUsernameAsync(username);
+                var user = await _userService.GetUserByUsernameAsync(username);
 
                 if (user != null)
                 {
@@ -81,7 +81,7 @@ namespace GraphQL.WebApi.Mvc.Services
             try
             {
                 // Check if user already exists
-                var existingUser = await _graphQLService.GetUserByUsernameAsync(model.Username);
+                var existingUser = await _userService.GetUserByUsernameAsync(model.Username);
                 if (existingUser != null)
                 {
                     _logger.LogWarning("User registration failed: Username {Username} already exists", model.Username);
@@ -89,7 +89,7 @@ namespace GraphQL.WebApi.Mvc.Services
                 }
 
                 // Create new user
-                var newUser = new User
+                var newUser = new GraphQL.WebApi.Mvc.Models.User
                 {
                     Username = model.Username,
                     Email = model.Email,
@@ -98,7 +98,7 @@ namespace GraphQL.WebApi.Mvc.Services
                     IsActive = true
                 };
 
-                var createdUser = await _graphQLService.CreateUserAsync(newUser, model.Password);
+                var createdUser = await _userService.CreateUserAsync(newUser, model.Password);
 
                 if (createdUser != null)
                 {

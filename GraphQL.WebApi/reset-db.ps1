@@ -1,27 +1,34 @@
-# Reset Database and Ensure Proper Seeding
-Write-Host "Resetting Database..." -ForegroundColor Green
+# Reset Database and Test Login
+Write-Host "🔄 Resetting GraphQL Web API Database..." -ForegroundColor Yellow
 
-# Remove the database file
-$dbPath = "GraphQL.WebApi.db"
-if (Test-Path $dbPath) {
-    Remove-Item $dbPath -Force
-    Write-Host "Removed existing database: $dbPath" -ForegroundColor Yellow
-}
+# Navigate to the GraphQL API project
+Set-Location "GraphQL.WebApi"
 
-# Remove migrations
-$migrationsPath = "Migrations"
-if (Test-Path $migrationsPath) {
-    Remove-Item $migrationsPath -Recurse -Force
-    Write-Host "Removed existing migrations" -ForegroundColor Yellow
-}
+# Remove existing migrations
+Write-Host "📁 Removing existing migrations..." -ForegroundColor Cyan
+dotnet ef migrations remove --force
 
-# Create new migration
-Write-Host "Creating new migration..." -ForegroundColor Yellow
+# Add new migration
+Write-Host "📝 Adding new migration..." -ForegroundColor Cyan
 dotnet ef migrations add InitialCreate
 
 # Update database
-Write-Host "Updating database..." -ForegroundColor Yellow
+Write-Host "🗄️ Updating database..." -ForegroundColor Cyan
 dotnet ef database update
 
-Write-Host "Database reset completed!" -ForegroundColor Green
-Write-Host "Now start the API to seed the database with users and customers." -ForegroundColor Cyan
+Write-Host "✅ Database reset complete!" -ForegroundColor Green
+Write-Host ""
+Write-Host "🔑 Test Credentials:" -ForegroundColor Yellow
+Write-Host "   Username: admin" -ForegroundColor White
+Write-Host "   Password: admin123" -ForegroundColor White
+Write-Host ""
+Write-Host "   Username: user" -ForegroundColor White
+Write-Host "   Password: user123" -ForegroundColor White
+Write-Host ""
+Write-Host "🌐 Start the applications:" -ForegroundColor Yellow
+Write-Host "   1. GraphQL API: cd GraphQL.WebApi && dotnet run" -ForegroundColor White
+Write-Host "   2. MVC App: cd GraphQL.WebApi.Mvc && dotnet run" -ForegroundColor White
+Write-Host ""
+Write-Host "📱 Access URLs:" -ForegroundColor Yellow
+Write-Host "   GraphQL API: https://localhost:5001/graphql" -ForegroundColor White
+Write-Host "   MVC App: https://localhost:5231" -ForegroundColor White

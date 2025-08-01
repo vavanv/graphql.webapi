@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 // Configure HTTP client for GraphQL API
-builder.Services.AddHttpClient<IGraphQLService, GraphQLService>(client =>
+builder.Services.AddHttpClient<IGraphQLClient, GraphQLClient>(client =>
 {
     client.BaseAddress = new Uri("https://localhost:5001/graphql");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
@@ -34,6 +34,7 @@ builder.Services.AddAuthorization();
 // Add custom services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 

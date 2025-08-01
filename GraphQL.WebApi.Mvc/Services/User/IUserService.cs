@@ -2,14 +2,8 @@ using GraphQL.WebApi.Mvc.Models;
 
 namespace GraphQL.WebApi.Mvc.Services
 {
-    public interface IGraphQLService
+    public interface IUserService
     {
-        Task<List<Customer>> GetCustomersAsync();
-        Task<Customer?> GetCustomerByIdAsync(int id);
-        Task<Customer?> CreateCustomerAsync(Customer customer);
-        Task<Customer?> UpdateCustomerAsync(Customer customer);
-
-        // User-related methods
         Task<List<User>> GetUsersAsync();
         Task<User?> GetUserByUsernameAsync(string username);
         Task<User?> GetUserByIdAsync(int id);
