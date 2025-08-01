@@ -18,6 +18,7 @@ namespace GraphQL.WebApi.Mvc.Controllers
             _logger = logger;
         }
 
+        [Authorize(Roles = "Admin,Manager,User,Guest")]
         public async Task<IActionResult> Index()
         {
             try
@@ -33,6 +34,7 @@ namespace GraphQL.WebApi.Mvc.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin,Manager,User,Guest")]
         public async Task<IActionResult> Details(int id)
         {
             try
@@ -53,6 +55,7 @@ namespace GraphQL.WebApi.Mvc.Controllers
         }
 
         // GET: Customers/Create
+        [Authorize(Roles = "Admin,Manager,User")]
         public IActionResult Create()
         {
             return View();
@@ -61,6 +64,7 @@ namespace GraphQL.WebApi.Mvc.Controllers
         // POST: Customers/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Manager,User")]
         public async Task<IActionResult> Create([Bind("FirstName,LastName,Contact,Email,DateOfBirth")] Customer customer)
         {
             if (ModelState.IsValid)
@@ -89,6 +93,7 @@ namespace GraphQL.WebApi.Mvc.Controllers
         }
 
         // GET: Customers/Edit/5
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> Edit(int id)
         {
             try
@@ -111,6 +116,7 @@ namespace GraphQL.WebApi.Mvc.Controllers
         // POST: Customers/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Contact,Email,DateOfBirth")] Customer customer)
         {
             _logger.LogInformation("Edit request received for customer ID: {Id}, ModelState.IsValid: {IsValid}", id, ModelState.IsValid);

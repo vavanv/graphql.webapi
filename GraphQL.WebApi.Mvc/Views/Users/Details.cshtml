@@ -1,0 +1,130 @@
+@model GraphQL.WebApi.Mvc.Models.User
+
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">
+                        <i class="bi bi-person-circle"></i> User Details
+                    </h2>
+                    <div>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to List
+                        </a>
+                        <a asp-action="EditRole" asp-route-id="@Model.Id" class="btn btn-warning">
+                            <i class="bi bi-shield"></i> Edit Role
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.ErrorMessage != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i> @ViewBag.ErrorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4 class="text-primary mb-3">Basic Information</h4>
+                            <dl class="row">
+                                <dt class="col-sm-4">ID</dt>
+                                <dd class="col-sm-8">@Model.Id</dd>
+
+                                <dt class="col-sm-4">Username</dt>
+                                <dd class="col-sm-8">
+                                    <strong>@Model.Username</strong>
+                                </dd>
+
+                                <dt class="col-sm-4">Email</dt>
+                                <dd class="col-sm-8">@Model.Email</dd>
+
+                                <dt class="col-sm-4">Full Name</dt>
+                                <dd class="col-sm-8">@Model.FirstName @Model.LastName</dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <h4 class="text-primary mb-3">Account Information</h4>
+                            <dl class="row">
+                                <dt class="col-sm-4">Role</dt>
+                                <dd class="col-sm-8">
+                                    <span class="badge bg-@(Model.Role switch {
+                                        "Admin" => "danger",
+                                        "Manager" => "warning",
+                                        "User" => "primary",
+                                        "Guest" => "secondary",
+                                        _ => "light"
+                                    })">
+                                        @Model.Role
+                                    </span>
+                                </dd>
+
+                                <dt class="col-sm-4">Status</dt>
+                                <dd class="col-sm-8">
+                                    @if (Model.IsActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    }
+                                </dd>
+
+                                <dt class="col-sm-4">Created</dt>
+                                <dd class="col-sm-8">@Model.CreatedAt.ToString("MMM dd, yyyy HH:mm")</dd>
+
+                                <dt class="col-sm-4">Last Login</dt>
+                                <dd class="col-sm-8">
+                                    @if (Model.LastLoginAt.HasValue)
+                                    {
+                                        @Model.LastLoginAt.Value.ToString("MMM dd, yyyy HH:mm")
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Never</span>
+                                    }
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h4 class="text-primary mb-3">Role Permissions</h4>
+                            <div class="alert alert-info">
+                                <h6><i class="bi bi-info-circle"></i> Current Role: @Model.Role</h6>
+                                <p class="mb-0">
+                                    @switch (Model.Role)
+                                    {
+                                        case "Admin":
+                                            <span>Full system access including user management, customer management, and all administrative functions.</span>
+                                            break;
+                                        case "Manager":
+                                            <span>Customer management capabilities including view, create, and edit customers. Can also view users.</span>
+                                            break;
+                                        case "User":
+                                            <span>Basic customer operations including view and create customers.</span>
+                                            break;
+                                        case "Guest":
+                                            <span>Read-only access to view customers only.</span>
+                                            break;
+                                        default:
+                                            <span>Limited access with basic viewing permissions.</span>
+                                            break;
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -77,7 +77,8 @@ namespace GraphQL.WebApi.GraphQL
             string password,
             string firstName,
             string lastName,
-            [Service] ApplicationDbContext context)
+            [Service] ApplicationDbContext context,
+            string role = "User")
         {
             try
             {
@@ -88,6 +89,12 @@ namespace GraphQL.WebApi.GraphQL
                     throw new Exception("User with this username or email already exists");
                 }
 
+                // Validate role
+                if (!AppRoles.AllRoles.Contains(role))
+                {
+                    throw new Exception($"Invalid role: {role}. Valid roles are: {string.Join(", ", AppRoles.AllRoles)}");
+                }
+
                 var user = new User
                 {
                     Username = username,
@@ -95,6 +102,7 @@ namespace GraphQL.WebApi.GraphQL
                     PasswordHash = HashPassword(password),
                     FirstName = firstName,
                     LastName = lastName,
+                    Role = role,
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
                 };
@@ -107,6 +115,36 @@ namespace GraphQL.WebApi.GraphQL
             catch (Exception ex)
             {
                 throw new Exception($"Error adding user: {ex.Message}");
+            }
+        }
+
+        public async Task<User?> updateUserRole(
+            int id,
+            string role,
+            [Service] ApplicationDbContext context)
+        {
+            try
+            {
+                var user = await context.Users.FindAsync(id);
+                if (user == null)
+                {
+                    throw new Exception($"User with id {id} not found");
+                }
+
+                // Validate role
+                if (!AppRoles.AllRoles.Contains(role))
+                {
+                    throw new Exception($"Invalid role: {role}. Valid roles are: {string.Join(", ", AppRoles.AllRoles)}");
+                }
+
+                user.Role = role;
+                await context.SaveChangesAsync();
+
+                return user;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error updating user role: {ex.Message}");
             }
         }
 
@@ -140,4 +178,4 @@ namespace GraphQL.WebApi.GraphQL
             }
         }
     }
-} 
+}

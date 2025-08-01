@@ -24,6 +24,18 @@ namespace GraphQL.WebApi.Data
                         PasswordHash = HashPassword("admin123"),
                         FirstName = "Admin",
                         LastName = "User",
+                        Role = AppRoles.Admin,
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow
+                    },
+                    new User
+                    {
+                        Username = "manager",
+                        Email = "manager@example.com",
+                        PasswordHash = HashPassword("manager123"),
+                        FirstName = "Manager",
+                        LastName = "User",
+                        Role = AppRoles.Manager,
                         IsActive = true,
                         CreatedAt = DateTime.UtcNow
                     },
@@ -34,6 +46,18 @@ namespace GraphQL.WebApi.Data
                         PasswordHash = HashPassword("user123"),
                         FirstName = "Regular",
                         LastName = "User",
+                        Role = AppRoles.User,
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow
+                    },
+                    new User
+                    {
+                        Username = "guest",
+                        Email = "guest@example.com",
+                        PasswordHash = HashPassword("guest123"),
+                        FirstName = "Guest",
+                        LastName = "User",
+                        Role = AppRoles.Guest,
                         IsActive = true,
                         CreatedAt = DateTime.UtcNow
                     }

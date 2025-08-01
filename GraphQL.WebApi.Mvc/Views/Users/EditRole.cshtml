@@ -1,0 +1,127 @@
+@model GraphQL.WebApi.Mvc.Models.User
+
+@{
+    ViewData["Title"] = "Edit User Role";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">
+                        <i class="bi bi-shield"></i> Edit User Role
+                    </h2>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.ErrorMessage != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i> @ViewBag.ErrorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <div class="alert alert-warning">
+                        <h6><i class="bi bi-exclamation-triangle"></i> Warning</h6>
+                        <p class="mb-0">Changing a user's role will immediately affect their access permissions. Please ensure this change is appropriate.</p>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="text-primary">User Information</h5>
+                            <dl class="row">
+                                <dt class="col-sm-4">Username</dt>
+                                <dd class="col-sm-8"><strong>@Model.Username</strong></dd>
+
+                                <dt class="col-sm-4">Name</dt>
+                                <dd class="col-sm-8">@Model.FirstName @Model.LastName</dd>
+
+                                <dt class="col-sm-4">Email</dt>
+                                <dd class="col-sm-8">@Model.Email</dd>
+
+                                <dt class="col-sm-4">Current Role</dt>
+                                <dd class="col-sm-8">
+                                    <span class="badge bg-@(Model.Role switch {
+                                        "Admin" => "danger",
+                                        "Manager" => "warning",
+                                        "User" => "primary",
+                                        "Guest" => "secondary",
+                                        _ => "light"
+                                    })">
+                                        @Model.Role
+                                    </span>
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-primary">Role Permissions</h5>
+                            <div class="small">
+                                <ul class="list-unstyled">
+                                    <li><strong>Admin:</strong> Full system access</li>
+                                    <li><strong>Manager:</strong> Customer management + view users</li>
+                                    <li><strong>User:</strong> View and create customers</li>
+                                    <li><strong>Guest:</strong> View customers only</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form asp-action="EditRole" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="Username" />
+                        <input type="hidden" asp-for="Email" />
+                        <input type="hidden" asp-for="FirstName" />
+                        <input type="hidden" asp-for="LastName" />
+                        <input type="hidden" asp-for="IsActive" />
+                        <input type="hidden" asp-for="CreatedAt" />
+                        <input type="hidden" asp-for="LastLoginAt" />
+
+                        <div class="mb-3">
+                            <label for="role" class="form-label">New Role</label>
+                            <select id="role" name="role" class="form-select" required>
+                                @foreach (var role in ViewBag.Roles as List<string>)
+                                {
+                                    if (role == Model.Role)
+                                    {
+                                        <option value="@role" selected>@role (Current)</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@role">@role</option>
+                                    }
+                                }
+                            </select>
+                            <div class="form-text">Select the new role for this user.</div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to List
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-shield"></i> Update Role
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Confirm role change
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const currentRole = '@Model.Role';
+            const newRole = document.getElementById('role').value;
+
+            if (currentRole !== newRole) {
+                if (!confirm(`Are you sure you want to change the role from "${currentRole}" to "${newRole}"? This will immediately affect the user's permissions.`)) {
+                    e.preventDefault();
+                }
+            }
+        });
+    </script>
+}

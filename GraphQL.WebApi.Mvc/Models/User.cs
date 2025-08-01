@@ -23,6 +23,10 @@ namespace GraphQL.WebApi.Mvc.Models
         [StringLength(50)]
         public string LastName { get; set; } = string.Empty;
 
+        [Required]
+        [StringLength(20)]
+        public string Role { get; set; } = "User";
+
         public bool IsActive { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -73,5 +77,8 @@ namespace GraphQL.WebApi.Mvc.Models
 
         [Display(Name = "Last Name")]
         public string LastName { get; set; } = string.Empty;
+
+        [Display(Name = "Role")]
+        public string Role { get; set; } = "User";
     }
 }

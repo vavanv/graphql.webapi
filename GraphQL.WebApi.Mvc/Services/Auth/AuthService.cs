@@ -88,13 +88,14 @@ namespace GraphQL.WebApi.Mvc.Services
                     return false;
                 }
 
-                // Create new user
+                // Create new user with role
                 var newUser = new GraphQL.WebApi.Mvc.Models.User
                 {
                     Username = model.Username,
                     Email = model.Email,
                     FirstName = model.FirstName,
                     LastName = model.LastName,
+                    Role = model.Role ?? "User", // Default to User role if not specified
                     IsActive = true
                 };
 
@@ -102,7 +103,7 @@ namespace GraphQL.WebApi.Mvc.Services
 
                 if (createdUser != null)
                 {
-                    _logger.LogInformation("User {Username} registered successfully", model.Username);
+                    _logger.LogInformation("User {Username} registered successfully with role {Role}", model.Username, newUser.Role);
                     return true;
                 }
                 else

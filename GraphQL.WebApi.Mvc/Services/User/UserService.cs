@@ -26,6 +26,7 @@ namespace GraphQL.WebApi.Mvc.Services
                             passwordHash
                             firstName
                             lastName
+                            role
                             isActive
                             createdAt
                             lastLoginAt
@@ -55,6 +56,7 @@ namespace GraphQL.WebApi.Mvc.Services
                             passwordHash
                             firstName
                             lastName
+                            role
                             isActive
                             createdAt
                             lastLoginAt
@@ -85,6 +87,7 @@ namespace GraphQL.WebApi.Mvc.Services
                             passwordHash
                             firstName
                             lastName
+                            role
                             isActive
                             createdAt
                             lastLoginAt
@@ -107,13 +110,14 @@ namespace GraphQL.WebApi.Mvc.Services
             try
             {
                 var mutation = @"
-                    mutation($username: String!, $email: String!, $password: String!, $firstName: String!, $lastName: String!) {
-                        addUser(username: $username, email: $email, password: $password, firstName: $firstName, lastName: $lastName) {
+                    mutation($username: String!, $email: String!, $password: String!, $firstName: String!, $lastName: String!, $role: String!) {
+                        addUser(username: $username, email: $email, password: $password, firstName: $firstName, lastName: $lastName, role: $role) {
                             id
                             username
                             email
                             firstName
                             lastName
+                            role
                             isActive
                             createdAt
                         }
@@ -125,7 +129,8 @@ namespace GraphQL.WebApi.Mvc.Services
                     email = user.Email,
                     password = password,
                     firstName = user.FirstName,
-                    lastName = user.LastName
+                    lastName = user.LastName,
+                    role = user.Role
                 };
 
                 var response = await _graphQLClient.ExecuteQueryAsync(mutation, variables);
@@ -134,6 +139,35 @@ namespace GraphQL.WebApi.Mvc.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating user with username {Username} via GraphQL API", user.Username);
+                return null;
+            }
+        }
+
+        public async Task<User?> UpdateUserRoleAsync(int id, string role)
+        {
+            try
+            {
+                var mutation = @"
+                    mutation($id: Int!, $role: String!) {
+                        updateUserRole(id: $id, role: $role) {
+                            id
+                            username
+                            email
+                            firstName
+                            lastName
+                            role
+                            isActive
+                            createdAt
+                        }
+                    }";
+
+                var variables = new { id, role };
+                var response = await _graphQLClient.ExecuteQueryAsync(mutation, variables);
+                return response?.Data?.UpdateUserRole;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating user role for id {Id} via GraphQL API", id);
                 return null;
             }
         }
@@ -150,6 +184,7 @@ namespace GraphQL.WebApi.Mvc.Services
                             email
                             firstName
                             lastName
+                            role
                             isActive
                             lastLoginAt
                         }

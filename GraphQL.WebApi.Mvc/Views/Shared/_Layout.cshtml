@@ -38,11 +38,27 @@
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Customers" asp-action="Index">
                                         <i class="bi bi-list"></i> View All Customers
                                     </a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Customers" asp-action="Create">
-                                        <i class="bi bi-plus-circle"></i> Create New Customer
-                                    </a></li>
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("User"))
+                                    {
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Customers" asp-action="Create">
+                                            <i class="bi bi-plus-circle"></i> Create New Customer
+                                        </a></li>
+                                    }
                                 </ul>
                             </li>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-shield-check"></i> Admin
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Users" asp-action="Index">
+                                            <i class="bi bi-people-fill"></i> Manage Users
+                                        </a></li>
+                                    </ul>
+                                </li>
+                            }
                         }
                         <li class="nav-item">
                             <a class="nav-link text-dark" href="https://localhost:5001/graphql/" target="_blank">
@@ -60,6 +76,9 @@
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                     <li><span class="dropdown-item-text">
                                         <i class="bi bi-person"></i> @User.FindFirst("FirstName")?.Value @User.FindFirst("LastName")?.Value
+                                    </span></li>
+                                    <li><span class="dropdown-item-text">
+                                        <i class="bi bi-shield"></i> Role: @User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
                                     </span></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>

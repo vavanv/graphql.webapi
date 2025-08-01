@@ -12,6 +12,7 @@ namespace GraphQL.WebApi.Mvc.Services
         public User? User { get; set; }
         public User? AddUser { get; set; }
         public User? UpdateUserLastLogin { get; set; }
+        public User? UpdateUserRole { get; set; }
         public User? UserById { get; set; }
     }
 }

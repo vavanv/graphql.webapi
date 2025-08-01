@@ -65,5 +65,10 @@ namespace GraphQL.WebApi.GraphQL
                 throw new Exception($"Error accessing user with id {id}: {ex.Message}");
             }
         }
+
+        public IQueryable<string> roles()
+        {
+            return AppRoles.AllRoles.AsQueryable();
+        }
     }
 }

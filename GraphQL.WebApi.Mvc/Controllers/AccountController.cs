@@ -44,6 +44,7 @@ namespace GraphQL.WebApi.Mvc.Controllers
                             new Claim(ClaimTypes.Name, user.Username),
                             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                             new Claim(ClaimTypes.Email, user.Email),
+                            new Claim(ClaimTypes.Role, user.Role),
                             new Claim("FirstName", user.FirstName),
                             new Claim("LastName", user.LastName)
                         };
@@ -60,7 +61,7 @@ namespace GraphQL.WebApi.Mvc.Controllers
                             new ClaimsPrincipal(claimsIdentity),
                             authProperties);
 
-                        _logger.LogInformation("User {Username} logged in", model.Username);
+                        _logger.LogInformation("User {Username} logged in with role {Role}", model.Username, user.Role);
 
                         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                         {

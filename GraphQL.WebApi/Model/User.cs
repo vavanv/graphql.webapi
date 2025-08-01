@@ -24,6 +24,10 @@ namespace GraphQL.WebApi.Model
         [StringLength(50)]
         public string LastName { get; set; } = string.Empty;
         
+        [Required]
+        [StringLength(20)]
+        public string Role { get; set; } = AppRoles.User;
+        
         public bool IsActive { get; set; } = true;
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
