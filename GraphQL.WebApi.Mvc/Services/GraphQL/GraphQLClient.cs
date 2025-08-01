@@ -41,7 +41,17 @@ namespace GraphQL.WebApi.Mvc.Services
 
                 if (result?.Errors?.Any() == true)
                 {
-                    _logger.LogError("GraphQL errors: {Errors}", JsonSerializer.Serialize(result.Errors));
+                    var errorMessages = result.Errors.Select(e =>
+                    {
+                        var location = e.Locations?.FirstOrDefault();
+                        if (location != null)
+                        {
+                            return $"Error at line {location.Line}, column {location.Column}: {e.Message}";
+                        }
+                        return $"Error: {e.Message}";
+                    });
+
+                    _logger.LogError("GraphQL errors: {Errors}", string.Join("; ", errorMessages));
                 }
 
                 return result;
