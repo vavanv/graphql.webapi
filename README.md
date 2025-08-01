@@ -180,7 +180,7 @@ The MVC application uses a clean service layer architecture:
 
 - **Interface**: `IGraphQLClient`
 - **Implementation**: `GraphQLClient`
-- **Responsibilities**: HTTP communication with GraphQL API
+- **Responsibilities**: HTTP communication with GraphQL API, enhanced error handling with precise location information
 
 ### **GraphQL Response Classes**
 
@@ -842,6 +842,99 @@ public class GraphQLLocation { ... }
 - **🧪 Easier Testing**: Test individual response classes separately
 - **📚 Clear Documentation**: Each file is self-documenting
 
+## 🔧 Enhanced GraphQL Error Handling
+
+### **Improved Error Processing**
+
+The GraphQL client now provides enhanced error handling with precise location information:
+
+#### **Before (Simple JSON Serialization):**
+
+```csharp
+if (result?.Errors?.Any() == true)
+{
+    _logger.LogError("GraphQL errors: {Errors}", JsonSerializer.Serialize(result.Errors));
+}
+```
+
+**Output:**
+
+```
+GraphQL errors: [{"message":"Cannot query field 'invalidField' on type 'Customer'","locations":[{"line":3,"column":5}]}]
+```
+
+#### **After (User-Friendly Error Messages):**
+
+```csharp
+if (result?.Errors?.Any() == true)
+{
+    var errorMessages = result.Errors.Select(e =>
+    {
+        var location = e.Locations?.FirstOrDefault();
+        if (location != null)
+        {
+            return $"Error at line {location.Line}, column {location.Column}: {e.Message}";
+        }
+        return $"Error: {e.Message}";
+    });
+
+    _logger.LogError("GraphQL errors: {Errors}", string.Join("; ", errorMessages));
+}
+```
+
+**Output:**
+
+```
+GraphQL errors: Error at line 3, column 5: Cannot query field 'invalidField' on type 'Customer'
+```
+
+### **Benefits of Enhanced Error Handling:**
+
+- **🎯 Precise Error Location**: Shows exact line and column numbers
+- **📝 Developer-Friendly**: Human-readable error messages
+- **🔍 Quick Debugging**: Immediate identification of query problems
+- **🛠️ Multiple Error Support**: Handles multiple errors gracefully
+- **🛡️ Null-Safe Processing**: Safely handles errors without location data
+- **📊 GraphQL Compliance**: Follows official GraphQL error specification
+
+### **Real-World Error Example:**
+
+**Invalid Query:**
+
+```graphql
+query {
+  customers {
+    id
+    nonExistentField # ← This causes an error
+    firstName
+  }
+}
+```
+
+**GraphQL Response:**
+
+```json
+{
+  "errors": [
+    {
+      "message": "Cannot query field 'nonExistentField' on type 'Customer'",
+      "locations": [
+        {
+          "line": 3,
+          "column": 5
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Enhanced Log Output:**
+
+```
+[Error] GraphQL errors: Error at line 3, column 5: Cannot query field 'nonExistentField' on type 'Customer'
+```
+
 ## 📄 License
 
 This project is for educational purposes. Feel free to use and modify as needed.
@@ -858,6 +951,7 @@ This project is for educational purposes. Feel free to use and modify as needed.
 - **GraphQL Response Classes**: Separated into individual files for maintainability
 - **Namespace Conflict Resolution**: All services properly organized
 - **Enhanced Logging**: Comprehensive logging throughout the application
+- **Enhanced GraphQL Error Handling**: Precise error location with user-friendly messages
 
 ### **🚀 Ready for Production:**
 
