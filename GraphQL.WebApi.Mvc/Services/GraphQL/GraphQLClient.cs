@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using GraphQL.WebApi.Mvc.Models;
 
 namespace GraphQL.WebApi.Mvc.Services
 {
