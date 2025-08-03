@@ -169,6 +169,27 @@ namespace GraphQL.WebApi.GraphQL
             }
         }
 
+        public async Task<bool> deleteCustomer(int id, [Service] ApplicationDbContext context)
+        {
+            try
+            {
+                var customer = await context.Customers.FindAsync(id);
+                if (customer == null)
+                {
+                    throw new Exception($"Customer with id {id} not found");
+                }
+
+                context.Customers.Remove(customer);
+                await context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error deleting customer: {ex.Message}");
+            }
+        }
+
         private string HashPassword(string password)
         {
             using (var sha256 = SHA256.Create())

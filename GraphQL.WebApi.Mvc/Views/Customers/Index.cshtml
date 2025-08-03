@@ -71,6 +71,10 @@
                                                     onclick="showEditCustomer(@customer.Id, '@customer.FirstName', '@customer.LastName', '@customer.Contact', '@customer.Email', '@customer.DateOfBirth.ToString("yyyy-MM-dd")')">
                                                 <i class="bi bi-pencil"></i> Edit
                                             </button>
+                                            <button type="button" class="btn btn-sm btn-danger"
+                                                    onclick="showDeleteCustomer(@customer.Id, '@customer.FirstName', '@customer.LastName')">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -215,10 +219,80 @@
     </div>
 </div>
 
+<!-- Delete Customer Modal -->
+<div class="modal fade" id="deleteCustomerModal" tabindex="-1" aria-labelledby="deleteCustomerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteCustomerModalLabel">
+                    <i class="bi bi-exclamation-triangle"></i> Delete Customer
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="deleteCustomerForm" asp-action="Delete" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body text-center">
+                    <i class="bi bi-trash display-1 text-danger mb-3"></i>
+                    <h4 class="text-danger mb-3">Confirm Deletion</h4>
+                    <p class="text-muted mb-4">
+                        Are you sure you want to delete customer <strong id="delete-customer-name"></strong>?
+                    </p>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Warning:</strong> This action cannot be undone. The customer will be permanently removed from the system.
+                    </div>
+                    <input type="hidden" id="delete-customer-id" name="id" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Delete Customer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Permission Denied Modal -->
+<div class="modal fade" id="deletePermissionDeniedModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-shield-exclamation"></i> Access Denied
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="bi bi-lock display-1 text-danger mb-3"></i>
+                <h4 class="text-danger mb-3">Permission Required</h4>
+                <p class="text-muted mb-4">
+                    You do not have permission to delete customers. Only <strong>Administrators</strong> can delete customer information.
+                </p>
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Your Role:</strong> <span id="deleteUserRoleDisplay"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden field to store user role -->
+<input type="hidden" id="userRole" value="@ViewBag.UserRole" />
+
 @section Scripts {
     <script>
         // Get user role from server-side
-        const userRole = '@User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value' || 'Guest';
+        const userRole = document.getElementById('userRole').value || 'Guest';
+        console.log('=== USER ROLE DEBUG ===');
+        console.log('User Role Element Value:', document.getElementById('userRole').value);
+        console.log('Final User Role:', userRole);
+        console.log('======================');
 
         function showCustomerDetails(id, firstName, lastName, contact, email, dateOfBirth) {
             document.getElementById('detail-id').textContent = id;
@@ -315,6 +389,84 @@
             .catch(error => {
                 console.error('Error:', error);
                 alert('Error updating customer. Please try again.');
+            });
+        });
+
+        function showDeleteCustomer(id, firstName, lastName) {
+            // Check if user has permission to delete customers (Admin only)
+            const hasDeletePermission = userRole === 'Admin';
+
+            console.log('=== DELETE CUSTOMER DEBUG ===');
+            console.log('User Role:', userRole);
+            console.log('User Role Type:', typeof userRole);
+            console.log('User Role Length:', userRole.length);
+            console.log('Has Delete Permission:', hasDeletePermission);
+            console.log('============================');
+
+            if (!hasDeletePermission) {
+                // Show error message for unauthorized users
+                console.log('Showing delete permission denied modal');
+                document.getElementById('deleteUserRoleDisplay').textContent = userRole;
+                const modal = new bootstrap.Modal(document.getElementById('deletePermissionDeniedModal'));
+                modal.show();
+                return;
+            }
+
+            // User has permission, proceed with delete confirmation
+            console.log('Opening delete confirmation modal');
+            document.getElementById('delete-customer-id').value = id;
+            document.getElementById('delete-customer-name').textContent = `${firstName} ${lastName}`;
+
+            const modal = new bootstrap.Modal(document.getElementById('deleteCustomerModal'));
+            modal.show();
+        }
+
+        // Handle delete form submission
+        document.getElementById('deleteCustomerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const customerId = formData.get('id');
+
+            // Get anti-forgery token
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            fetch('@Url.Action("Delete", "Customers")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'RequestVerificationToken': token
+                },
+                body: new URLSearchParams(formData)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    // Show success message
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                    alertDiv.innerHTML = `
+                        <i class="bi bi-check-circle"></i> ${result.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.container-fluid').firstChild);
+
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('deleteCustomerModal'));
+                    modal.hide();
+
+                    // Reload page after a short delay
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error deleting customer. Please try again.');
             });
         });
     </script>

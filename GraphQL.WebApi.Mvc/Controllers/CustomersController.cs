@@ -24,6 +24,7 @@ namespace GraphQL.WebApi.Mvc.Controllers
             try
             {
                 var customers = await _customerService.GetCustomersAsync();
+                ViewBag.UserRole = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value ?? "Guest";
                 return View(customers);
             }
             catch (Exception ex)
@@ -202,6 +203,60 @@ namespace GraphQL.WebApi.Mvc.Controllers
             else
             {
                 return View(customer);
+            }
+        }
+
+        // POST: Customers/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = AppRoles.Admin)]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                _logger.LogInformation("Delete request received for customer ID: {Id}", id);
+
+                var deleteResult = await _customerService.DeleteCustomerAsync(id);
+
+                if (deleteResult)
+                {
+                    _logger.LogInformation("Customer deleted successfully with ID: {Id}", id);
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Json(new { success = true, message = "Customer deleted successfully!" });
+                    }
+                    else
+                    {
+                        TempData["SuccessMessage"] = "Customer deleted successfully!";
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to delete customer with ID {Id}: GraphQL service returned false", id);
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Json(new { success = false, message = "Failed to delete customer. Please try again." });
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Failed to delete customer. Please try again.";
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting customer with id {Id}", id);
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = $"An error occurred while deleting the customer: {ex.Message}" });
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "An error occurred while deleting the customer. Please try again.";
+                    return RedirectToAction(nameof(Index));
+                }
             }
         }
     }

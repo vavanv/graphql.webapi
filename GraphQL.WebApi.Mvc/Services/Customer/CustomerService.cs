@@ -177,5 +177,41 @@ namespace GraphQL.WebApi.Mvc.Services
                 throw;
             }
         }
+
+        public async Task<bool> DeleteCustomerAsync(int id)
+        {
+            try
+            {
+                _logger.LogInformation("Deleting customer with ID: {Id}", id);
+
+                var mutation = @"
+                    mutation($id: Int!) {
+                        deleteCustomer(id: $id)
+                    }";
+
+                var variables = new
+                {
+                    id = id
+                };
+
+                var response = await _graphQLClient.ExecuteQueryAsync(mutation, variables);
+                var deleteResult = response?.Data?.DeleteCustomer;
+
+                if (deleteResult == true)
+                {
+                    _logger.LogInformation("Successfully deleted customer with ID: {Id}", id);
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to delete customer with ID {Id}: GraphQL service returned false", id);
+                }
+                return deleteResult ?? false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting customer with ID: {Id}", id);
+                throw;
+            }
+        }
     }
 }
