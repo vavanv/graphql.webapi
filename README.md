@@ -13,6 +13,9 @@ A modern GraphQL API built with **ASP.NET Core 8** and **HotChocolate GraphQL** 
 - **Full CRUD Operations**: Create, Read, Update, Delete customers
 - **User Authentication & Authorization**: Cookie-based authentication with protected routes
 - **Role-Based Access Control (RBAC)**: Advanced authorization with role-based permissions
+- **Modal Popup Interface**: Modern user management with modal dialogs for details and role editing
+- **AJAX Integration**: Real-time updates without page reloads
+- **Enhanced Error Handling**: Comprehensive error handling with detailed logging
 - **Clean Architecture**: Separated service layer with dedicated interfaces per entity
 - **Common GraphQL Client**: Reusable HTTP client for GraphQL communication
 - **Single Responsibility Principle**: Each service handles one specific domain
@@ -21,12 +24,16 @@ A modern GraphQL API built with **ASP.NET Core 8** and **HotChocolate GraphQL** 
 - **Enhanced Logging**: Comprehensive logging throughout the application
 - **Organized Service Layer**: Services organized by domain (Auth, Customer, User, GraphQL)
 - **Resolved Namespace Conflicts**: Clean service organization with proper type resolution
+- **Permission System**: Granular permission-based access control
+- **Password Security**: SHA256 password hashing with validation
+- **Session Management**: Configurable authentication with sliding expiration
 
 ## 🔐 Role-Based Access Control (RBAC)
 
 The application implements a comprehensive RBAC system with the following roles and permissions:
 
 ### Roles
+
 - **Admin**: Full system access and user management
 - **Manager**: Customer management and limited user viewing
 - **User**: Basic customer operations (view and create)
@@ -34,26 +41,65 @@ The application implements a comprehensive RBAC system with the following roles 
 
 ### Permissions by Role
 
-| Permission | Admin | Manager | User | Guest |
-|------------|-------|---------|------|-------|
-| View Customers | ✅ | ✅ | ✅ | ✅ |
-| Create Customer | ✅ | ✅ | ✅ | ❌ |
-| Edit Customer | ✅ | ✅ | ❌ | ❌ |
-| Delete Customer | ✅ | ❌ | ❌ | ❌ |
-| View Users | ✅ | ✅ | ❌ | ❌ |
-| Create User | ✅ | ❌ | ❌ | ❌ |
-| Edit User Role | ✅ | ❌ | ❌ | ❌ |
-| Manage Roles | ✅ | ❌ | ❌ | ❌ |
+| Permission      | Admin | Manager | User | Guest |
+| --------------- | ----- | ------- | ---- | ----- |
+| View Customers  | ✅    | ✅      | ✅   | ✅    |
+| Create Customer | ✅    | ✅      | ✅   | ❌    |
+| Edit Customer   | ✅    | ✅      | ❌   | ❌    |
+| Delete Customer | ✅    | ❌      | ❌   | ❌    |
+| View Users      | ✅    | ✅      | ❌   | ❌    |
+| Create User     | ✅    | ❌      | ❌   | ❌    |
+| Edit User Role  | ✅    | ❌      | ❌   | ❌    |
+| Manage Roles    | ✅    | ❌      | ❌   | ❌    |
 
 ### Demo Users
+
 The system comes with pre-configured demo users:
 
-| Username | Password | Role | Access Level |
-|----------|----------|------|-------------|
-| `admin` | `admin123` | Admin | Full system access |
+| Username  | Password     | Role    | Access Level        |
+| --------- | ------------ | ------- | ------------------- |
+| `admin`   | `admin123`   | Admin   | Full system access  |
 | `manager` | `manager123` | Manager | Customer management |
-| `user` | `user123` | User | Basic operations |
-| `guest` | `guest123` | Guest | Read-only access |
+| `user`    | `user123`    | User    | Basic operations    |
+| `guest`   | `guest123`   | Guest   | Read-only access    |
+
+## 🎨 User Interface Features
+
+### Modal Popup System
+
+The application features a modern modal-based user management interface:
+
+#### User Details Modal
+
+- **Large modal** with comprehensive user information
+- **Two-column layout** showing basic and account information
+- **Role permissions section** with detailed descriptions
+- **Edit Role button** that seamlessly transitions to role editing
+- **Real-time data population** with user details
+
+#### Edit Role Modal
+
+- **Compact modal** focused on role management
+- **Warning message** about permission changes
+- **User information display** for context
+- **Role dropdown** with all available roles
+- **Confirmation dialog** before making changes
+- **AJAX submission** for seamless updates
+
+#### AJAX Integration
+
+- **Real-time updates** without page reloads
+- **Success/error feedback** with dynamic alerts
+- **Smooth transitions** between modals
+- **Form validation** and confirmation dialogs
+
+### Enhanced User Experience
+
+- **One-click access** to user details
+- **Inline role editing** without page navigation
+- **Visual feedback** with success/error messages
+- **Responsive design** that works on all devices
+- **Auto-hiding alerts** for better UX
 
 ## 📋 Prerequisites
 
@@ -70,6 +116,8 @@ The system comes with pre-configured demo users:
 - **Banana Cake Pop IDE**
 - **ASP.NET Core MVC**
 - **Role-Based Authorization**
+- **Bootstrap 5** (for responsive UI)
+- **jQuery** (for modal interactions)
 
 ## 🏗️ Project Structure
 
@@ -122,6 +170,12 @@ GraphQL.WebApi.Mvc/
 │       ├── IUserService.cs
 │       └── UserService.cs
 ├── Views/
+│   ├── Users/
+│   │   ├── Index.cshtml (with modal functionality)
+│   │   ├── Details.cshtml
+│   │   ├── Create.cshtml
+│   │   └── EditRole.cshtml
+│   └── Shared/
 ├── Program.cs
 └── appsettings.json
 ```
@@ -152,6 +206,7 @@ dotnet run
 ```
 
 The API will be available at:
+
 - **GraphQL Endpoint**: `https://localhost:5001/graphql`
 - **Banana Cake Pop IDE**: `https://localhost:5001/graphql/`
 
@@ -165,6 +220,7 @@ dotnet run
 ```
 
 The MVC app will be available at:
+
 - **Web Interface**: `http://localhost:5231`
 
 ## 🔐 Authentication & Authorization
@@ -175,24 +231,27 @@ The MVC app will be available at:
 2. Click "Login" in the navigation
 3. Use any of the demo credentials:
 
-| Username | Password | Role | Features Available |
-|----------|----------|------|-------------------|
-| `admin` | `admin123` | Admin | All features + User management |
-| `manager` | `manager123` | Manager | Customer management |
-| `user` | `user123` | User | View and create customers |
-| `guest` | `guest123` | Guest | View customers only |
+| Username  | Password     | Role    | Features Available             |
+| --------- | ------------ | ------- | ------------------------------ |
+| `admin`   | `admin123`   | Admin   | All features + User management |
+| `manager` | `manager123` | Manager | Customer management            |
+| `user`    | `user123`    | User    | View and create customers      |
+| `guest`   | `guest123`   | Guest   | View customers only            |
 
 ### Role-Based Features
 
 #### Admin Role
+
 - ✅ View all customers
 - ✅ Create new customers
 - ✅ Edit existing customers
 - ✅ Delete customers
 - ✅ Manage users (view, create, edit roles)
 - ✅ Access to "Admin" dropdown in navigation
+- ✅ Modal-based user management interface
 
 #### Manager Role
+
 - ✅ View all customers
 - ✅ Create new customers
 - ✅ Edit existing customers
@@ -201,6 +260,7 @@ The MVC app will be available at:
 - ❌ Manage users
 
 #### User Role
+
 - ✅ View all customers
 - ✅ Create new customers
 - ❌ Edit customers
@@ -208,11 +268,41 @@ The MVC app will be available at:
 - ❌ Access user management
 
 #### Guest Role
+
 - ✅ View all customers
 - ❌ Create customers
 - ❌ Edit customers
 - ❌ Delete customers
 - ❌ Access user management
+
+## 🎯 User Management Interface
+
+### Modal Features
+
+#### User Details Modal
+
+- **Comprehensive user information** display
+- **Role badges** with color coding (Admin=red, Manager=yellow, User=blue, Guest=gray)
+- **Status indicators** (Active/Inactive)
+- **Account timestamps** (Created, Last Login)
+- **Permission descriptions** based on current role
+- **Direct link** to edit role functionality
+
+#### Edit Role Modal
+
+- **Warning message** about permission changes
+- **User context** display (username, name, email)
+- **Current role** with badge display
+- **Role dropdown** with all available options
+- **Confirmation dialog** before role change
+- **Real-time feedback** with success/error messages
+
+### AJAX Integration
+
+- **Seamless role updates** without page reloads
+- **Dynamic alert system** with auto-hide functionality
+- **Error handling** with user-friendly messages
+- **Page refresh** after successful updates
 
 ## 📊 GraphQL Queries & Mutations
 
@@ -261,6 +351,21 @@ query {
 # Get user by username
 query {
   user(username: "admin") {
+    id
+    username
+    email
+    firstName
+    lastName
+    role
+    isActive
+    createdAt
+    lastLoginAt
+  }
+}
+
+# Get user by ID
+query {
+  userById(id: 1) {
     id
     username
     email
@@ -353,23 +458,35 @@ mutation {
     createdAt
   }
 }
+
+# Update user last login
+mutation {
+  updateUserLastLogin(id: 1) {
+    id
+    username
+    lastLoginAt
+  }
+}
 ```
 
 ## 🛡️ Security Features
 
 ### Authentication
+
 - **Cookie-based authentication** with secure settings
 - **Password hashing** using SHA256
 - **Session management** with configurable expiration
 - **Remember me** functionality
 
 ### Authorization
+
 - **Role-based access control** with granular permissions
 - **Controller-level authorization** using `[Authorize(Roles = "...")]`
 - **Action-level authorization** for fine-grained control
 - **UI-based role filtering** showing/hiding features based on user role
 
 ### Data Protection
+
 - **Model binding protection** using `[Bind]` attributes
 - **CSRF protection** with anti-forgery tokens
 - **Input validation** with data annotations
@@ -406,8 +523,24 @@ The application uses SQL Server LocalDB by default:
 1. **Start both applications** (GraphQL API and MVC)
 2. **Login with different roles** to test authorization
 3. **Navigate through the application** to verify role-based access
-4. **Test GraphQL queries** in Banana Cake Pop IDE
-5. **Verify database seeding** with demo data
+4. **Test modal functionality** in user management
+5. **Test GraphQL queries** in Banana Cake Pop IDE
+6. **Verify database seeding** with demo data
+
+### Modal Testing
+
+1. **Login as admin** to access user management
+2. **Click "Details"** on any user to see the modal popup
+3. **Click "Edit Role"** to test role editing functionality
+4. **Test role changes** and verify immediate feedback
+5. **Check page updates** after successful role changes
+
+### AJAX Testing
+
+1. **Test customer editing** via modal dialogs
+2. **Verify real-time updates** without page reloads
+3. **Check error handling** with invalid data
+4. **Test form validation** and feedback messages
 
 ### Automated Testing
 
@@ -428,10 +561,14 @@ The application includes comprehensive logging:
 - **GraphQL operations** (queries, mutations, errors)
 - **Database operations** (seeding, migrations)
 - **User management** (creation, role updates)
+- **Modal interactions** (user details, role editing)
+- **AJAX operations** (real-time updates, error handling)
+- **Error tracking** with detailed stack traces
 
 ## 🚀 Deployment
 
 ### Development
+
 ```bash
 # GraphQL API
 cd GraphQL.WebApi
@@ -443,6 +580,7 @@ dotnet run
 ```
 
 ### Production
+
 ```bash
 # Build for production
 dotnet publish -c Release
@@ -469,6 +607,7 @@ dotnet ef migrations remove
 - [HotChocolate GraphQL Documentation](https://chillicream.com/docs/hotchocolate)
 - [Entity Framework Core Documentation](https://docs.microsoft.com/en-us/ef/core/)
 - [GraphQL Specification](https://graphql.org/learn/)
+- [Bootstrap 5 Documentation](https://getbootstrap.com/docs/5.0/)
 
 ## 🤝 Contributing
 
