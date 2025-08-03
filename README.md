@@ -1,17 +1,20 @@
 # GraphQL Web API with ASP.NET Core 8
 
-A modern GraphQL API built with ASP.NET Core 8, HotChocolate GraphQL, Entity Framework Core, and a comprehensive MVC frontend with Role-Based Access Control (RBAC).
+A modern GraphQL API built with ASP.NET Core 8, HotChocolate GraphQL, Entity Framework Core, and a comprehensive MVC frontend with Role-Based Access Control (RBAC). This project demonstrates a complete full-stack solution with testing infrastructure and development utilities.
 
 ## 🚀 Features
 
 - **GraphQL API**: HotChocolate GraphQL server with queries and mutations
 - **Entity Framework Core 8**: Modern ORM with SQL Server LocalDB
 - **ASP.NET Core MVC**: Rich web interface with Bootstrap 5
-- **Role-Based Access Control (RBAC)**: Advanced authorization system
+- **Role-Based Access Control (RBAC)**: Advanced authorization system with 4 user roles
 - **Modal Dialogs**: Interactive customer and user management
 - **AJAX Integration**: Seamless updates without page reloads
 - **Professional Error Handling**: Modal-based permission denied dialogs
 - **Comprehensive Logging**: Detailed error tracking and debugging
+- **Testing Infrastructure**: Unit tests, integration tests, and test utilities
+- **Development Tools**: PowerShell scripts for testing and database management
+- **Clean Architecture**: Separation of concerns with service layer pattern
 
 ## 🏗️ Project Structure
 
@@ -19,19 +22,60 @@ A modern GraphQL API built with ASP.NET Core 8, HotChocolate GraphQL, Entity Fra
 GraphQL.WebApi/
 ├── GraphQL.WebApi/                 # GraphQL API Project
 │   ├── Data/                       # Database context and seeding
+│   │   ├── ApplicationDbContext.cs # EF Core DbContext
+│   │   └── DbInitializer.cs       # Database seeding logic
 │   ├── GraphQL/                    # GraphQL queries and mutations
+│   │   ├── Query.cs               # GraphQL queries
+│   │   └── Mutation.cs            # GraphQL mutations
 │   ├── Model/                      # Entity models
+│   │   ├── AppRoles.cs            # Role definitions
+│   │   ├── Customer.cs            # Customer entity
+│   │   └── User.cs                # User entity
+│   ├── Migrations/                 # EF Core migrations
+│   ├── appsettings.json           # Configuration
 │   └── Program.cs                  # API configuration
 ├── GraphQL.WebApi.Mvc/             # MVC Frontend Project
 │   ├── Controllers/                # MVC controllers
+│   │   ├── AccountController.cs   # Authentication controller
+│   │   ├── CustomersController.cs # Customer management
+│   │   ├── HomeController.cs      # Home page
+│   │   └── UsersController.cs     # User management
 │   ├── Models/                     # MVC-specific models
 │   ├── Services/                   # Business logic services
 │   │   ├── GraphQL/               # GraphQL client and response models
+│   │   │   ├── GraphQLClient.cs   # HTTP client for GraphQL
+│   │   │   ├── GraphQLResponse.cs # Response wrapper
+│   │   │   ├── GraphQLData.cs     # Data container
+│   │   │   ├── GraphQLError.cs    # Error information
+│   │   │   └── GraphQLLocation.cs # Error location
 │   │   ├── Customer/              # Customer-specific services
 │   │   ├── User/                  # User management services
 │   │   └── Auth/                  # Authentication services
 │   ├── Views/                     # Razor views with modals
+│   │   ├── Account/               # Authentication views
+│   │   ├── Customers/             # Customer management views
+│   │   ├── Users/                 # User management views
+│   │   └── Shared/                # Layout and shared components
+│   ├── wwwroot/                   # Static files (CSS, JS, libs)
 │   └── Program.cs                 # MVC configuration
+├── GraphQL.WebApi.Tests/           # Test Project
+│   ├── GraphQL/                   # GraphQL API tests
+│   │   ├── AuthTests.cs           # Authentication tests
+│   │   ├── CustomerTests.cs       # Customer operation tests
+│   │   ├── UserTests.cs           # User management tests
+│   │   └── ErrorHandlingTests.cs  # Error handling tests
+│   ├── TestData/                  # Test data builders
+│   ├── TestHelpers/               # Test utilities
+│   └── Unit/                      # Unit tests
+├── GraphQL.WebApi.TestUtils/       # Test Utilities Project
+│   └── TestData/                  # Shared test data
+├── PowerShell Scripts/             # Development and testing scripts
+│   ├── test-auth.ps1              # Authentication testing
+│   ├── verify-users.ps1           # User verification
+│   ├── reset-db.ps1               # Database reset
+│   ├── test-graphql.ps1           # GraphQL API testing
+│   ├── test-mutation.ps1          # Mutation testing
+│   └── test-*.ps1                 # Various test scripts
 └── README.md                      # This documentation
 ```
 
@@ -39,8 +83,10 @@ GraphQL.WebApi/
 
 ### Prerequisites
 
-- .NET 8 SDK
-- SQL Server LocalDB (included with Visual Studio)
+- **.NET 8 SDK** (Latest version)
+- **SQL Server LocalDB** (included with Visual Studio)
+- **PowerShell** (for running test scripts)
+- **Visual Studio 2022** or **VS Code** (recommended)
 
 ### Installation
 
@@ -73,6 +119,25 @@ GraphQL.WebApi/
 4. **Access Applications**
    - **GraphQL API**: https://localhost:5001/graphql
    - **MVC Frontend**: http://localhost:5231
+
+### Development Tools
+
+The project includes several PowerShell scripts for development and testing:
+
+```powershell
+# Test authentication
+.\test-auth.ps1
+
+# Verify user data
+.\verify-users.ps1
+
+# Reset database
+.\GraphQL.WebApi\reset-db.ps1
+
+# Test GraphQL operations
+.\GraphQL.WebApi\test-graphql.ps1
+.\GraphQL.WebApi\test-mutation.ps1
+```
 
 ## 🔐 Authentication & Authorization
 
@@ -141,7 +206,7 @@ GraphQL.WebApi/
 ### Session Management
 
 - **Cookie-based Authentication**: Secure session handling
-- **Configurable Timeouts**: Flexible session duration
+- **Configurable Timeouts**: Flexible session duration (8 hours)
 - **Sliding Expiration**: Extended sessions for active users
 
 ### Access Denied Handling
@@ -152,10 +217,40 @@ GraphQL.WebApi/
 
 ## 🧪 Testing
 
+### Test Projects
+
+The solution includes comprehensive testing infrastructure:
+
+- **GraphQL.WebApi.Tests**: Main test project with integration and unit tests
+- **GraphQL.WebApi.TestUtils**: Shared test utilities and data builders
+
+### Test Categories
+
+- **GraphQL API Tests**: Authentication, CRUD operations, error handling
+- **Integration Tests**: End-to-end testing with TestWebApplicationFactory
+- **Unit Tests**: Individual component testing
+- **Test Data Builders**: Fluent API for creating test data
+
+### Running Tests
+
+```bash
+# Run all tests
+dotnet test
+
+# Run specific test project
+dotnet test GraphQL.WebApi.Tests
+
+# Run with coverage
+dotnet test --collect:"XPlat Code Coverage"
+```
+
 ### PowerShell Test Scripts
 
 - **`test-auth.ps1`**: Authentication testing
 - **`verify-users.ps1`**: User verification scripts
+- **`test-graphql.ps1`**: GraphQL API testing
+- **`test-mutation.ps1`**: Mutation testing
+- **`reset-db.ps1`**: Database reset utility
 
 ### Manual Testing
 
@@ -329,6 +424,27 @@ public async Task<GraphQLResponse<T>> ExecuteQueryAsync<T>(string query, object?
 - **Health Checks**: Monitor application health
 - **Environment Variables**: Configure via environment
 
+## 📦 Dependencies
+
+### GraphQL API Project
+
+- **HotChocolate.AspNetCore**: 13.5.0 - GraphQL server
+- **HotChocolate.Data.EntityFramework**: 13.5.0 - EF Core integration
+- **Microsoft.EntityFrameworkCore**: 8.0.0 - ORM framework
+- **Microsoft.EntityFrameworkCore.SqlServer**: 8.0.0 - SQL Server provider
+
+### MVC Project
+
+- **Microsoft.Extensions.Http**: 9.0.7 - HTTP client factory
+- **Microsoft.AspNetCore.Authentication.Cookies**: 2.2.0 - Cookie authentication
+
+### Test Projects
+
+- **Microsoft.AspNetCore.Mvc.Testing**: 8.0.0 - Integration testing
+- **Microsoft.EntityFrameworkCore.InMemory**: 8.0.0 - In-memory database
+- **Moq**: 4.20.72 - Mocking framework
+- **xunit**: 2.9.2 - Testing framework
+
 ## 📖 Additional Resources
 
 - **GraphQL Documentation**: https://graphql.org/
@@ -424,30 +540,48 @@ if (result?.Errors?.Any() == true)
 
 - **GraphQL API**: Full CRUD operations for customers and users
 - **MVC Frontend**: Complete web interface with Bootstrap 5
-- **Role-Based Access Control**: Comprehensive permission system
+- **Role-Based Access Control**: Comprehensive permission system with 4 roles
 - **Modal Dialogs**: Professional user interface components
 - **AJAX Integration**: Seamless user experience
 - **Error Handling**: Comprehensive logging and user feedback
 - **Permission Denied Modals**: Professional error dialogs
 - **Debug Logging**: Role detection and permission checking
+- **Testing Infrastructure**: Unit tests, integration tests, and test utilities
+- **Development Tools**: PowerShell scripts for testing and database management
+- **Clean Architecture**: Service layer pattern with separation of concerns
 
 ### 🎯 Key Improvements
 
 - **Service Layer Architecture**: Clean separation of concerns
 - **GraphQL Response Models**: Organized and maintainable
-- **Enhanced Error Handling**: Detailed error tracking
+- **Enhanced Error Handling**: Detailed error tracking with location information
 - **Professional UI**: Modal-based permission denied dialogs
 - **Comprehensive Logging**: Debug information for development
+- **Testing Coverage**: Integration and unit tests for all major components
+- **Development Utilities**: PowerShell scripts for common development tasks
 
 ### 🔧 Technical Highlights
 
 - **ASP.NET Core 8**: Latest framework features
-- **HotChocolate GraphQL**: Modern GraphQL implementation
+- **HotChocolate GraphQL 13.5.0**: Modern GraphQL implementation
 - **Entity Framework Core 8**: Advanced ORM capabilities
 - **Bootstrap 5**: Modern responsive design
-- **Role-Based Security**: Advanced authorization system
-- **Professional UX**: Modal dialogs and error handling
+- **Role-Based Security**: Advanced authorization system with 4 distinct roles
+- **Professional UX**: Modal dialogs and comprehensive error handling
+- **Testing Infrastructure**: xUnit, Moq, and integration testing
+- **Development Tools**: PowerShell scripts for testing and database management
+
+### 🚧 Future Enhancements
+
+- **API Documentation**: Swagger/OpenAPI integration
+- **Performance Monitoring**: Application insights integration
+- **Caching Layer**: Redis or in-memory caching
+- **Background Jobs**: Hangfire or Quartz.NET integration
+- **Real-time Updates**: SignalR integration for live updates
+- **Advanced Security**: JWT tokens, refresh tokens, and API keys
+- **Containerization**: Docker and Kubernetes support
+- **CI/CD Pipeline**: GitHub Actions or Azure DevOps integration
 
 ---
 
-**Note**: This project demonstrates modern web development practices with GraphQL, ASP.NET Core, and comprehensive role-based access control. The architecture supports scalability and maintainability while providing an excellent user experience.
+**Note**: This project demonstrates modern web development practices with GraphQL, ASP.NET Core, comprehensive role-based access control, and professional testing infrastructure. The architecture supports scalability and maintainability while providing an excellent user experience and robust development tooling.
