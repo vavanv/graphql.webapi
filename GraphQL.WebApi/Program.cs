@@ -20,11 +20,14 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// Initialize database with sample data
-using (var scope = app.Services.CreateScope())
+// Initialize database with sample data (only in non-testing environments)
+if (!app.Environment.IsEnvironment("Test"))
 {
-    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    DbInitializer.Initialize(context);
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        DbInitializer.Initialize(context);
+    }
 }
 
 // Configure the HTTP request pipeline.
@@ -40,3 +43,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// Make Program class accessible to test projects
+public partial class Program { }
