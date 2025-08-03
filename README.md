@@ -67,8 +67,7 @@ GraphQL.WebApi/
 │   ├── TestData/                  # Test data builders
 │   ├── TestHelpers/               # Test utilities
 │   └── Unit/                      # Unit tests
-├── GraphQL.WebApi.TestUtils/       # Test Utilities Project
-│   └── TestData/                  # Shared test data
+
 ├── PowerShell Scripts/             # Development and testing scripts
 │   ├── test-auth.ps1              # Authentication testing
 │   ├── verify-users.ps1           # User verification
@@ -222,7 +221,6 @@ The project includes several PowerShell scripts for development and testing:
 The solution includes comprehensive testing infrastructure:
 
 - **GraphQL.WebApi.Tests**: Main test project with integration and unit tests
-- **GraphQL.WebApi.TestUtils**: Shared test utilities and data builders
 
 ### Test Categories
 

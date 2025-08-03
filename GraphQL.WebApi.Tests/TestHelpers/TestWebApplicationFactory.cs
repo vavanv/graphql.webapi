@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using GraphQL.WebApi.Data;
-using GraphQL.WebApi.TestUtils.TestData;
+using GraphQL.WebApi.Tests.TestData;
 using Microsoft.Extensions.Logging;
 
 namespace GraphQL.WebApi.Tests.TestHelpers
@@ -22,7 +22,7 @@ namespace GraphQL.WebApi.Tests.TestHelpers
                 // Remove the existing database context registration
                 var descriptor = services.SingleOrDefault(
                     d => d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>));
-                
+
                 if (descriptor != null)
                 {
                     services.Remove(descriptor);
@@ -54,7 +54,7 @@ namespace GraphQL.WebApi.Tests.TestHelpers
                         // Clear existing data and ensure database is created
                         db.Database.EnsureDeleted();
                         db.Database.EnsureCreated();
-                        
+
                         // Seed the database with test data only (skip main DbInitializer)
                         TestDataSeeder.SeedTestData(db);
                     }
