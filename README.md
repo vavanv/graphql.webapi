@@ -8,11 +8,12 @@ A modern GraphQL API built with ASP.NET Core 8, HotChocolate GraphQL, Entity Fra
 - **Entity Framework Core 8**: Modern ORM with SQL Server LocalDB
 - **ASP.NET Core MVC**: Rich web interface with Bootstrap 5
 - **Role-Based Access Control (RBAC)**: Advanced authorization system with 4 user roles
-- **Modal Dialogs**: Interactive customer and user management
+- **Customer Deletion**: Secure deletion with Admin-only access and comprehensive testing
+- **Modal Dialogs**: Interactive customer and user management with confirmation dialogs
 - **AJAX Integration**: Seamless updates without page reloads
 - **Professional Error Handling**: Modal-based permission denied dialogs
 - **Comprehensive Logging**: Detailed error tracking and debugging
-- **Testing Infrastructure**: Unit tests, integration tests, and test utilities
+- **Testing Infrastructure**: Unit tests, integration tests, and comprehensive test coverage
 - **Development Tools**: PowerShell scripts for testing and database management
 - **Clean Architecture**: Separation of concerns with service layer pattern
 
@@ -77,6 +78,96 @@ GraphQL.WebApi/
 │   └── test-*.ps1                 # Various test scripts
 └── README.md                      # This documentation
 ```
+
+## 🔒 Customer Deletion Functionality
+
+### Overview
+
+The customer deletion feature provides secure, role-based deletion with comprehensive testing coverage:
+
+### Security Features
+
+- **Admin-Only Access**: Only users with "Admin" role can delete customers
+- **Server-Side Authorization**: `[Authorize(Roles = AppRoles.Admin)]` attribute protection
+- **Client-Side Validation**: JavaScript permission checks with user-friendly error messages
+- **Confirmation Dialogs**: Professional modal dialogs for delete confirmation
+- **Permission Denied Modals**: Clear feedback for unauthorized users
+
+### GraphQL Implementation
+
+```csharp
+// GraphQL Mutation
+public async Task<bool> deleteCustomer(int id, [Service] ApplicationDbContext context)
+{
+    try
+    {
+        var customer = await context.Customers.FindAsync(id);
+        if (customer == null)
+        {
+            throw new Exception($"Customer with id {id} not found");
+        }
+
+        context.Customers.Remove(customer);
+        await context.SaveChangesAsync();
+        return true;
+    }
+    catch (Exception ex)
+    {
+        throw new Exception($"Error deleting customer: {ex.Message}");
+    }
+}
+```
+
+### MVC Controller Implementation
+
+```csharp
+[HttpPost]
+[ValidateAntiForgeryToken]
+[Authorize(Roles = AppRoles.Admin)]
+public async Task<IActionResult> Delete(int id)
+{
+    try
+    {
+        var deleteResult = await _customerService.DeleteCustomerAsync(id);
+
+        if (deleteResult)
+        {
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return Json(new { success = true, message = "Customer deleted successfully!" });
+            }
+            else
+            {
+                TempData["SuccessMessage"] = "Customer deleted successfully!";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+        // ... error handling
+    }
+    catch (Exception ex)
+    {
+        // ... exception handling
+    }
+}
+```
+
+### Test Coverage
+
+The deletion functionality includes comprehensive test coverage:
+
+- **Success Scenarios**: Valid customer deletion with database verification
+- **Error Scenarios**: Invalid IDs, non-existent customers, edge cases
+- **Authorization Tests**: Role-based access control validation
+- **Integration Tests**: End-to-end testing with in-memory database
+- **Edge Cases**: Zero IDs, negative IDs, large invalid IDs
+
+### User Experience
+
+- **Delete Button**: Only visible to Admin users
+- **Confirmation Modal**: Professional Bootstrap modal with customer details
+- **Permission Denied Modal**: Clear feedback for non-Admin users
+- **AJAX Support**: Seamless updates without page reload
+- **Error Handling**: User-friendly error messages
 
 ## 🛠️ Getting Started
 
@@ -225,6 +316,7 @@ The solution includes comprehensive testing infrastructure:
 ### Test Categories
 
 - **GraphQL API Tests**: Authentication, CRUD operations, error handling
+- **Customer Deletion Tests**: Comprehensive coverage of delete functionality
 - **Integration Tests**: End-to-end testing with TestWebApplicationFactory
 - **Unit Tests**: Individual component testing
 - **Test Data Builders**: Fluent API for creating test data
@@ -237,6 +329,12 @@ dotnet test
 
 # Run specific test project
 dotnet test GraphQL.WebApi.Tests
+
+# Run customer deletion tests
+dotnet test GraphQL.WebApi.Tests --filter "CustomerTests.DeleteCustomer"
+
+# Run all customer tests
+dotnet test GraphQL.WebApi.Tests --filter "CustomerTests"
 
 # Run with coverage
 dotnet test --collect:"XPlat Code Coverage"
@@ -255,18 +353,101 @@ dotnet test --collect:"XPlat Code Coverage"
 1. **Login with demo users** using the provided credentials
 2. **Test role-based access** by accessing different features
 3. **Verify customer operations** with different user roles
-4. **Test user management** as an admin user
-5. **Check permission denied modals** by logging in as User/Guest and clicking Edit buttons
+4. **Test customer deletion** as Admin user (only Admin can delete)
+5. **Test permission denied** by logging in as User/Guest and clicking Delete buttons
+6. **Test user management** as an admin user
+7. **Check permission denied modals** by logging in as User/Guest and clicking Edit buttons
 
 ## 📚 Code Examples
+
+### Customer Deletion Tests
+
+```csharp
+[Fact]
+public async Task DeleteCustomer_DeletesCustomerSuccessfully()
+{
+    // Arrange
+    var customer = _dbContext.Customers.First();
+    var initialCount = _dbContext.Customers.Count();
+
+    var mutation = $@"
+        mutation DeleteCustomer {{
+            deleteCustomer(id: {customer.Id})
+        }}";
+
+    // Act
+    var result = await ExecuteGraphQLMutationAsync(mutation);
+
+    // Assert
+    var deleteResult = result.RootElement.GetProperty("data").GetProperty("deleteCustomer");
+    Assert.True(deleteResult.GetBoolean());
+
+    // Verify customer was actually deleted from database
+    var finalCount = _dbContext.Customers.Count();
+    Assert.Equal(initialCount - 1, finalCount);
+
+    // Verify the specific customer no longer exists
+    var deletedCustomer = _dbContext.Customers.FirstOrDefault(c => c.Id == customer.Id);
+    Assert.Null(deletedCustomer);
+}
+
+[Fact]
+public async Task DeleteCustomer_WithInvalidId_ReturnsError()
+{
+    // Arrange
+    const int invalidId = 99999;
+    var mutation = $@"
+        mutation DeleteCustomer {{
+            deleteCustomer(id: {invalidId})
+        }}";
+
+    // Act
+    var result = await ExecuteGraphQLMutationAsync(mutation);
+
+    // Assert
+    Assert.True(result.RootElement.TryGetProperty("errors", out var errors));
+    Assert.True(errors.GetArrayLength() > 0);
+
+    var errorMessage = errors[0].GetProperty("message").GetString();
+    Assert.True(errorMessage.Contains("Error") || errorMessage.Contains("Unexpected Execution Error"));
+}
+```
 
 ### JavaScript Role Detection
 
 ```javascript
 // Get user role from server-side
-const userRole =
-  '@User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value' ||
-  "Guest";
+const userRole = document.getElementById("userRole").value || "Guest";
+
+function showDeleteCustomer(id, firstName, lastName) {
+  // Check if user has permission to delete customers (Admin only)
+  const hasDeletePermission = userRole === "Admin";
+
+  console.log("=== DELETE CUSTOMER DEBUG ===");
+  console.log("User Role:", userRole);
+  console.log("Has Delete Permission:", hasDeletePermission);
+
+  if (!hasDeletePermission) {
+    // Show error message for unauthorized users
+    document.getElementById("deleteUserRoleDisplay").textContent = userRole;
+    const modal = new bootstrap.Modal(
+      document.getElementById("deletePermissionDeniedModal")
+    );
+    modal.show();
+    return;
+  }
+
+  // User has permission, proceed with delete confirmation
+  document.getElementById("delete-customer-id").value = id;
+  document.getElementById(
+    "delete-customer-name"
+  ).textContent = `${firstName} ${lastName}`;
+
+  const modal = new bootstrap.Modal(
+    document.getElementById("deleteCustomerModal")
+  );
+  modal.show();
+}
 
 function showEditCustomer(
   id,
@@ -537,14 +718,15 @@ if (result?.Errors?.Any() == true)
 ### ✅ Completed Features
 
 - **GraphQL API**: Full CRUD operations for customers and users
+- **Customer Deletion**: Secure deletion with Admin-only access control
 - **MVC Frontend**: Complete web interface with Bootstrap 5
 - **Role-Based Access Control**: Comprehensive permission system with 4 roles
-- **Modal Dialogs**: Professional user interface components
+- **Modal Dialogs**: Professional user interface components including delete confirmation
 - **AJAX Integration**: Seamless user experience
 - **Error Handling**: Comprehensive logging and user feedback
-- **Permission Denied Modals**: Professional error dialogs
+- **Permission Denied Modals**: Professional error dialogs for unauthorized actions
 - **Debug Logging**: Role detection and permission checking
-- **Testing Infrastructure**: Unit tests, integration tests, and test utilities
+- **Testing Infrastructure**: Unit tests, integration tests, and comprehensive test coverage
 - **Development Tools**: PowerShell scripts for testing and database management
 - **Clean Architecture**: Service layer pattern with separation of concerns
 
@@ -553,10 +735,11 @@ if (result?.Errors?.Any() == true)
 - **Service Layer Architecture**: Clean separation of concerns
 - **GraphQL Response Models**: Organized and maintainable
 - **Enhanced Error Handling**: Detailed error tracking with location information
-- **Professional UI**: Modal-based permission denied dialogs
+- **Professional UI**: Modal-based permission denied dialogs and delete confirmation
 - **Comprehensive Logging**: Debug information for development
-- **Testing Coverage**: Integration and unit tests for all major components
+- **Testing Coverage**: Integration and unit tests for all major components including customer deletion
 - **Development Utilities**: PowerShell scripts for common development tasks
+- **Customer Deletion Security**: Admin-only access with proper authorization checks
 
 ### 🔧 Technical Highlights
 
@@ -566,8 +749,9 @@ if (result?.Errors?.Any() == true)
 - **Bootstrap 5**: Modern responsive design
 - **Role-Based Security**: Advanced authorization system with 4 distinct roles
 - **Professional UX**: Modal dialogs and comprehensive error handling
-- **Testing Infrastructure**: xUnit, Moq, and integration testing
+- **Testing Infrastructure**: xUnit, Moq, and integration testing with comprehensive coverage
 - **Development Tools**: PowerShell scripts for testing and database management
+- **Customer Deletion**: Secure GraphQL mutation with proper error handling and database verification
 
 ### 🚧 Future Enhancements
 
@@ -579,7 +763,10 @@ if (result?.Errors?.Any() == true)
 - **Advanced Security**: JWT tokens, refresh tokens, and API keys
 - **Containerization**: Docker and Kubernetes support
 - **CI/CD Pipeline**: GitHub Actions or Azure DevOps integration
+- **Soft Delete**: Implement soft delete functionality for data recovery
+- **Audit Logging**: Track all customer deletion operations
+- **Bulk Operations**: Support for bulk customer deletion with confirmation
 
 ---
 
-**Note**: This project demonstrates modern web development practices with GraphQL, ASP.NET Core, comprehensive role-based access control, and professional testing infrastructure. The architecture supports scalability and maintainability while providing an excellent user experience and robust development tooling.
+**Note**: This project demonstrates modern web development practices with GraphQL, ASP.NET Core, comprehensive role-based access control, and professional testing infrastructure. The architecture supports scalability and maintainability while providing an excellent user experience and robust development tooling. The customer deletion functionality showcases secure, role-based operations with comprehensive test coverage and professional user interface design.

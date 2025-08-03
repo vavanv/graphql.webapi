@@ -5,6 +5,11 @@ using Microsoft.Extensions.DependencyInjection;
 using GraphQL.WebApi.Data;
 using GraphQL.WebApi.Tests.TestData;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Options;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
 
 namespace GraphQL.WebApi.Tests.TestHelpers
 {
@@ -65,6 +70,37 @@ namespace GraphQL.WebApi.Tests.TestHelpers
                     }
                 }
             });
+
+            // Configure test authentication
+            builder.ConfigureTestServices(services =>
+            {
+                services.AddAuthentication("Test")
+                    .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", options => { });
+            });
+        }
+    }
+
+    public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+    {
+        public TestAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
+            : base(options, logger, encoder, clock)
+        {
+        }
+
+        protected override Task<AuthenticateResult> HandleAuthenticateAsync()
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, "testuser"),
+                new Claim(ClaimTypes.NameIdentifier, "1"),
+                new Claim(ClaimTypes.Role, "Admin")
+            };
+
+            var identity = new ClaimsIdentity(claims, "Test");
+            var principal = new ClaimsPrincipal(identity);
+            var ticket = new AuthenticationTicket(principal, "Test");
+
+            return Task.FromResult(AuthenticateResult.Success(ticket));
         }
     }
 }

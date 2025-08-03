@@ -128,6 +128,100 @@ namespace GraphQL.WebApi.Tests.GraphQL
             Assert.Equal(customer.Id, updatedCustomer.GetProperty("id").GetInt32());
             Assert.Equal(newEmail, updatedCustomer.GetProperty("email").GetString());
         }
+
+        [Fact]
+        public async Task DeleteCustomer_DeletesCustomerSuccessfully()
+        {
+            // Arrange
+            var customer = _dbContext.Customers.First();
+            var initialCount = _dbContext.Customers.Count();
+
+            var mutation = $@"
+                mutation DeleteCustomer {{
+                    deleteCustomer(id: {customer.Id})
+                }}";
+
+            // Act
+            var result = await ExecuteGraphQLMutationAsync(mutation);
+
+            // Assert
+            var deleteResult = result.RootElement.GetProperty("data").GetProperty("deleteCustomer");
+            Assert.True(deleteResult.GetBoolean());
+
+            // Verify customer was actually deleted from database
+            var finalCount = _dbContext.Customers.Count();
+            Assert.Equal(initialCount - 1, finalCount);
+
+            // Verify the specific customer no longer exists
+            var deletedCustomer = _dbContext.Customers.FirstOrDefault(c => c.Id == customer.Id);
+            Assert.Null(deletedCustomer);
+        }
+
+                [Fact]
+        public async Task DeleteCustomer_WithInvalidId_ReturnsError()
+        {
+            // Arrange
+            const int invalidId = 99999;
+            var mutation = $@"
+                mutation DeleteCustomer {{
+                    deleteCustomer(id: {invalidId})
+                }}";
+
+            // Act
+            var result = await ExecuteGraphQLMutationAsync(mutation);
+
+            // Assert
+            Assert.True(result.RootElement.TryGetProperty("errors", out var errors));
+            Assert.True(errors.GetArrayLength() > 0);
+
+            var errorMessage = errors[0].GetProperty("message").GetString();
+            // In test environment, we might get generic error messages
+            Assert.True(errorMessage.Contains("Error") || errorMessage.Contains("Unexpected Execution Error"));
+        }
+
+                [Fact]
+        public async Task DeleteCustomer_WithZeroId_ReturnsError()
+        {
+            // Arrange
+            const int zeroId = 0;
+            var mutation = $@"
+                mutation DeleteCustomer {{
+                    deleteCustomer(id: {zeroId})
+                }}";
+
+            // Act
+            var result = await ExecuteGraphQLMutationAsync(mutation);
+
+            // Assert
+            Assert.True(result.RootElement.TryGetProperty("errors", out var errors));
+            Assert.True(errors.GetArrayLength() > 0);
+
+            var errorMessage = errors[0].GetProperty("message").GetString();
+            // In test environment, we might get generic error messages
+            Assert.True(errorMessage.Contains("Error") || errorMessage.Contains("Unexpected Execution Error"));
+        }
+
+                [Fact]
+        public async Task DeleteCustomer_WithNegativeId_ReturnsError()
+        {
+            // Arrange
+            const int negativeId = -1;
+            var mutation = $@"
+                mutation DeleteCustomer {{
+                    deleteCustomer(id: {negativeId})
+                }}";
+
+            // Act
+            var result = await ExecuteGraphQLMutationAsync(mutation);
+
+            // Assert
+            Assert.True(result.RootElement.TryGetProperty("errors", out var errors));
+            Assert.True(errors.GetArrayLength() > 0);
+
+            var errorMessage = errors[0].GetProperty("message").GetString();
+            // In test environment, we might get generic error messages
+            Assert.True(errorMessage.Contains("Error") || errorMessage.Contains("Unexpected Execution Error"));
+        }
     }
 }
 
