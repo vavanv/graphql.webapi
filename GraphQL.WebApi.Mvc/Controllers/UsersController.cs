@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GraphQL.WebApi.Mvc.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = AppRoles.Admin)]
     public class UsersController : Controller
     {
         private readonly IUserService _userService;
@@ -54,7 +54,7 @@ namespace GraphQL.WebApi.Mvc.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.Roles = new List<string> { "Admin", "Manager", "User", "Guest" };
+            ViewBag.Roles = AppRoles.AllRoles.ToList();
             return View();
         }
 
@@ -84,7 +84,7 @@ namespace GraphQL.WebApi.Mvc.Controllers
                 }
             }
 
-            ViewBag.Roles = new List<string> { "Admin", "Manager", "User", "Guest" };
+            ViewBag.Roles = AppRoles.AllRoles.ToList();
             return View(user);
         }
 
@@ -99,7 +99,7 @@ namespace GraphQL.WebApi.Mvc.Controllers
                     return NotFound();
                 }
 
-                ViewBag.Roles = new List<string> { "Admin", "Manager", "User", "Guest" };
+                ViewBag.Roles = AppRoles.AllRoles.ToList();
                 return View(user);
             }
             catch (Exception ex)
@@ -134,7 +134,7 @@ namespace GraphQL.WebApi.Mvc.Controllers
             }
 
             var user = await _userService.GetUserByIdAsync(id);
-            ViewBag.Roles = new List<string> { "Admin", "Manager", "User", "Guest" };
+            ViewBag.Roles = AppRoles.AllRoles.ToList();
             return View(user);
         }
 

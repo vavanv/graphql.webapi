@@ -78,7 +78,7 @@ namespace GraphQL.WebApi.GraphQL
             string firstName,
             string lastName,
             [Service] ApplicationDbContext context,
-            string role = "User")
+            string role = AppRoles.User)
         {
             try
             {

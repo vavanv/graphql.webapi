@@ -1,4 +1,4 @@
-namespace GraphQL.WebApi.Model
+namespace GraphQL.WebApi.Mvc.Models
 {
     public static class AppRoles
     {

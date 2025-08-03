@@ -187,8 +187,39 @@
     </div>
 </div>
 
+<!-- Permission Denied Modal -->
+<div class="modal fade" id="permissionDeniedModal" tabindex="-1" aria-labelledby="permissionDeniedModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="permissionDeniedModalLabel">
+                    <i class="bi bi-shield-exclamation"></i> Access Denied
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="bi bi-lock display-1 text-danger mb-3"></i>
+                <h4 class="text-danger mb-3">Permission Required</h4>
+                <p class="text-muted mb-4">
+                    You do not have permission to edit customers. Only <strong>Administrators</strong> and <strong>Managers</strong> can edit customer information.
+                </p>
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Your Role:</strong> <span id="userRoleDisplay"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
+        // Get user role from server-side
+        const userRole = '@User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value' || 'Guest';
+
         function showCustomerDetails(id, firstName, lastName, contact, email, dateOfBirth) {
             document.getElementById('detail-id').textContent = id;
             document.getElementById('detail-firstName').textContent = firstName;
@@ -207,6 +238,23 @@
         }
 
         function showEditCustomer(id, firstName, lastName, contact, email, dateOfBirth) {
+            // Check if user has permission to edit customers
+            const hasEditPermission = userRole === 'Admin' || userRole === 'Manager';
+
+            console.log('User Role:', userRole);
+            console.log('Has Edit Permission:', hasEditPermission);
+
+            if (!hasEditPermission) {
+                // Show error message for unauthorized users
+                console.log('Showing permission denied modal');
+                document.getElementById('userRoleDisplay').textContent = userRole;
+                const modal = new bootstrap.Modal(document.getElementById('permissionDeniedModal'));
+                modal.show();
+                return;
+            }
+
+            // User has permission, proceed with opening edit modal
+            console.log('Opening edit modal');
             document.getElementById('edit-id').value = id;
             document.getElementById('edit-firstName').value = firstName;
             document.getElementById('edit-lastName').value = lastName;

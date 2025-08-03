@@ -1,45 +1,91 @@
 # GraphQL Web API with ASP.NET Core 8
 
-A modern GraphQL API built with **ASP.NET Core 8** and **HotChocolate GraphQL** that demonstrates GraphQL implementation with Entity Framework Core and SQL Server. The solution includes both a GraphQL API and an MVC web application with full CRUD capabilities and **Role-Based Access Control (RBAC)**.
+A modern GraphQL API built with ASP.NET Core 8, HotChocolate GraphQL, Entity Framework Core, and a comprehensive MVC frontend with Role-Based Access Control (RBAC).
 
 ## 🚀 Features
 
-- **.NET 8**: Latest framework with minimal hosting model
-- **HotChocolate GraphQL**: Modern, high-performance GraphQL implementation
-- **Entity Framework Core 8**: Latest ORM with improved performance
-- **SQL Server LocalDB**: Local database for development
-- **Banana Cake Pop**: Built-in GraphQL IDE for testing
-- **MVC Web Application**: User-friendly web interface for data visualization
-- **Full CRUD Operations**: Create, Read, Update, Delete customers
-- **User Authentication & Authorization**: Cookie-based authentication with protected routes
-- **Role-Based Access Control (RBAC)**: Advanced authorization with role-based permissions
-- **Modal Popup Interface**: Modern user management with modal dialogs for details and role editing
-- **AJAX Integration**: Real-time updates without page reloads
-- **Enhanced Error Handling**: Comprehensive error handling with detailed logging
-- **Clean Architecture**: Separated service layer with dedicated interfaces per entity
-- **Common GraphQL Client**: Reusable HTTP client for GraphQL communication
-- **Single Responsibility Principle**: Each service handles one specific domain
-- **Nullable Reference Types**: Better null safety throughout
-- **Auto Database Seeding**: Sample data automatically populated on startup
-- **Enhanced Logging**: Comprehensive logging throughout the application
-- **Organized Service Layer**: Services organized by domain (Auth, Customer, User, GraphQL)
-- **Resolved Namespace Conflicts**: Clean service organization with proper type resolution
-- **Permission System**: Granular permission-based access control
-- **Password Security**: SHA256 password hashing with validation
-- **Session Management**: Configurable authentication with sliding expiration
+- **GraphQL API**: HotChocolate GraphQL server with queries and mutations
+- **Entity Framework Core 8**: Modern ORM with SQL Server LocalDB
+- **ASP.NET Core MVC**: Rich web interface with Bootstrap 5
+- **Role-Based Access Control (RBAC)**: Advanced authorization system
+- **Modal Dialogs**: Interactive customer and user management
+- **AJAX Integration**: Seamless updates without page reloads
+- **Professional Error Handling**: Modal-based permission denied dialogs
+- **Comprehensive Logging**: Detailed error tracking and debugging
 
-## 🔐 Role-Based Access Control (RBAC)
+## 🏗️ Project Structure
 
-The application implements a comprehensive RBAC system with the following roles and permissions:
+```
+GraphQL.WebApi/
+├── GraphQL.WebApi/                 # GraphQL API Project
+│   ├── Data/                       # Database context and seeding
+│   ├── GraphQL/                    # GraphQL queries and mutations
+│   ├── Model/                      # Entity models
+│   └── Program.cs                  # API configuration
+├── GraphQL.WebApi.Mvc/             # MVC Frontend Project
+│   ├── Controllers/                # MVC controllers
+│   ├── Models/                     # MVC-specific models
+│   ├── Services/                   # Business logic services
+│   │   ├── GraphQL/               # GraphQL client and response models
+│   │   ├── Customer/              # Customer-specific services
+│   │   ├── User/                  # User management services
+│   │   └── Auth/                  # Authentication services
+│   ├── Views/                     # Razor views with modals
+│   └── Program.cs                 # MVC configuration
+└── README.md                      # This documentation
+```
 
-### Roles
+## 🛠️ Getting Started
 
-- **Admin**: Full system access and user management
-- **Manager**: Customer management and limited user viewing
-- **User**: Basic customer operations (view and create)
-- **Guest**: Read-only access to customers
+### Prerequisites
 
-### Permissions by Role
+- .NET 8 SDK
+- SQL Server LocalDB (included with Visual Studio)
+
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <repository-url>
+   cd GraphQL.WebApi
+   ```
+
+2. **Setup Database**
+
+   ```bash
+   cd GraphQL.WebApi
+   dotnet ef database update
+   ```
+
+3. **Run Applications**
+
+   ```bash
+   # Terminal 1: Start GraphQL API
+   cd GraphQL.WebApi
+   dotnet run
+
+   # Terminal 2: Start MVC Frontend
+   cd GraphQL.WebApi.Mvc
+   dotnet run
+   ```
+
+4. **Access Applications**
+   - **GraphQL API**: https://localhost:5001/graphql
+   - **MVC Frontend**: http://localhost:5231
+
+## 🔐 Authentication & Authorization
+
+### Demo Users
+
+| Username  | Password     | Role    | Permissions                      |
+| --------- | ------------ | ------- | -------------------------------- |
+| `admin`   | `admin123`   | Admin   | Full access                      |
+| `manager` | `manager123` | Manager | Customer management              |
+| `user`    | `user123`    | User    | View customers, create customers |
+| `guest`   | `guest123`   | Guest   | View customers only              |
+
+### Role Permissions
 
 | Permission      | Admin | Manager | User | Guest |
 | --------------- | ----- | ------- | ---- | ----- |
@@ -52,575 +98,356 @@ The application implements a comprehensive RBAC system with the following roles 
 | Edit User Role  | ✅    | ❌      | ❌   | ❌    |
 | Manage Roles    | ✅    | ❌      | ❌   | ❌    |
 
-### Demo Users
+### Permission-Based Access Control
 
-The system comes with pre-configured demo users:
+- **Edit Buttons Visible**: All users can see edit buttons
+- **Client-Side Validation**: JavaScript checks permissions before opening modals
+- **Professional Error Dialogs**: Modal-based permission denied messages
+- **Role Display**: Shows user's current role in error messages
+- **Server-Side Security**: Controller authorization prevents unauthorized access
 
-| Username  | Password     | Role    | Access Level        |
-| --------- | ------------ | ------- | ------------------- |
-| `admin`   | `admin123`   | Admin   | Full system access  |
-| `manager` | `manager123` | Manager | Customer management |
-| `user`    | `user123`    | User    | Basic operations    |
-| `guest`   | `guest123`   | Guest   | Read-only access    |
+## 🎨 UI Features
 
-## 🎨 User Interface Features
+### Modal Popup Interface
 
-### Modal Popup System
-
-The application features a modern modal-based user management interface:
-
-#### User Details Modal
-
-- **Large modal** with comprehensive user information
-- **Two-column layout** showing basic and account information
-- **Role permissions section** with detailed descriptions
-- **Edit Role button** that seamlessly transitions to role editing
-- **Real-time data population** with user details
-
-#### Edit Role Modal
-
-- **Compact modal** focused on role management
-- **Warning message** about permission changes
-- **User information display** for context
-- **Role dropdown** with all available roles
-- **Confirmation dialog** before making changes
-- **AJAX submission** for seamless updates
-
-#### AJAX Integration
-
-- **Real-time updates** without page reloads
-- **Success/error feedback** with dynamic alerts
-- **Smooth transitions** between modals
-- **Form validation** and confirmation dialogs
-
-### Enhanced User Experience
-
-- **One-click access** to user details
-- **Inline role editing** without page navigation
-- **Visual feedback** with success/error messages
-- **Responsive design** that works on all devices
-- **Auto-hiding alerts** for better UX
-
-## 📋 Prerequisites
-
-- **.NET 8 SDK** installed
-- **SQL Server LocalDB** (usually comes with Visual Studio)
-- **Visual Studio 2022** or **VS Code** (recommended)
-
-## 🛠️ Technology Stack
-
-- **.NET 8**
-- **Entity Framework Core 8**
-- **HotChocolate GraphQL 13.5.0**
-- **SQL Server LocalDB**
-- **Banana Cake Pop IDE**
-- **ASP.NET Core MVC**
-- **Role-Based Authorization**
-- **Bootstrap 5** (for responsive UI)
-- **jQuery** (for modal interactions)
-
-## 🏗️ Project Structure
-
-### GraphQL API (`GraphQL.WebApi/`)
-
-```
-GraphQL.WebApi/
-├── Data/
-│   ├── ApplicationDbContext.cs
-│   └── DbInitializer.cs
-├── GraphQL/
-│   ├── Query.cs
-│   └── Mutation.cs
-├── Model/
-│   ├── Customer.cs
-│   ├── User.cs
-│   └── AppRoles.cs
-├── Migrations/
-├── Program.cs
-└── appsettings.json
-```
-
-### MVC Application (`GraphQL.WebApi.Mvc/`)
-
-```
-GraphQL.WebApi.Mvc/
-├── Controllers/
-│   ├── AccountController.cs
-│   ├── CustomersController.cs
-│   ├── HomeController.cs
-│   └── UsersController.cs
-├── Models/
-│   ├── Customer.cs
-│   └── User.cs (includes LoginViewModel, RegisterViewModel)
-├── Services/
-│   ├── Auth/
-│   │   ├── IAuthService.cs
-│   │   └── AuthService.cs
-│   ├── Customer/
-│   │   ├── ICustomerService.cs
-│   │   └── CustomerService.cs
-│   ├── GraphQL/
-│   │   ├── IGraphQLClient.cs
-│   │   ├── GraphQLClient.cs
-│   │   ├── GraphQLResponse.cs
-│   │   ├── GraphQLData.cs
-│   │   ├── GraphQLError.cs
-│   │   └── GraphQLLocation.cs
-│   └── User/
-│       ├── IUserService.cs
-│       └── UserService.cs
-├── Views/
-│   ├── Users/
-│   │   ├── Index.cshtml (with modal functionality)
-│   │   ├── Details.cshtml
-│   │   ├── Create.cshtml
-│   │   └── EditRole.cshtml
-│   └── Shared/
-├── Program.cs
-└── appsettings.json
-```
-
-## 🚀 Getting Started
-
-### 1. Clone and Navigate
-
-```bash
-cd GraphQL.WebApi/GraphQL.WebApi
-```
-
-### 2. Database Setup
-
-```bash
-# Create and apply migrations
-dotnet ef database update
-
-# The database will be automatically seeded with:
-# - 10 sample customers
-# - 4 demo users with different roles
-```
-
-### 3. Run the GraphQL API
-
-```bash
-dotnet run
-```
-
-The API will be available at:
-
-- **GraphQL Endpoint**: `https://localhost:5001/graphql`
-- **Banana Cake Pop IDE**: `https://localhost:5001/graphql/`
-
-### 4. Run the MVC Application
-
-In a new terminal:
-
-```bash
-cd GraphQL.WebApi.Mvc
-dotnet run
-```
-
-The MVC app will be available at:
-
-- **Web Interface**: `http://localhost:5231`
-
-## 🔐 Authentication & Authorization
-
-### Login with Demo Users
-
-1. Navigate to `http://localhost:5231`
-2. Click "Login" in the navigation
-3. Use any of the demo credentials:
-
-| Username  | Password     | Role    | Features Available             |
-| --------- | ------------ | ------- | ------------------------------ |
-| `admin`   | `admin123`   | Admin   | All features + User management |
-| `manager` | `manager123` | Manager | Customer management            |
-| `user`    | `user123`    | User    | View and create customers      |
-| `guest`   | `guest123`   | Guest   | View customers only            |
-
-### Role-Based Features
-
-#### Admin Role
-
-- ✅ View all customers
-- ✅ Create new customers
-- ✅ Edit existing customers
-- ✅ Delete customers
-- ✅ Manage users (view, create, edit roles)
-- ✅ Access to "Admin" dropdown in navigation
-- ✅ Modal-based user management interface
-
-#### Manager Role
-
-- ✅ View all customers
-- ✅ Create new customers
-- ✅ Edit existing customers
-- ❌ Delete customers
-- ✅ View users (read-only)
-- ❌ Manage users
-
-#### User Role
-
-- ✅ View all customers
-- ✅ Create new customers
-- ❌ Edit customers
-- ❌ Delete customers
-- ❌ Access user management
-
-#### Guest Role
-
-- ✅ View all customers
-- ❌ Create customers
-- ❌ Edit customers
-- ❌ Delete customers
-- ❌ Access user management
-
-## 🎯 User Management Interface
-
-### Modal Features
-
-#### User Details Modal
-
-- **Comprehensive user information** display
-- **Role badges** with color coding (Admin=red, Manager=yellow, User=blue, Guest=gray)
-- **Status indicators** (Active/Inactive)
-- **Account timestamps** (Created, Last Login)
-- **Permission descriptions** based on current role
-- **Direct link** to edit role functionality
-
-#### Edit Role Modal
-
-- **Warning message** about permission changes
-- **User context** display (username, name, email)
-- **Current role** with badge display
-- **Role dropdown** with all available options
-- **Confirmation dialog** before role change
-- **Real-time feedback** with success/error messages
+- **Customer Details**: View customer information in modal dialogs
+- **Customer Edit**: Edit customer data without page navigation (Admin/Manager only)
+- **User Details**: View user information and permissions
+- **Role Management**: Edit user roles with AJAX updates
+- **Permission-Based Access**: Edit buttons visible to all users with modal error messages for unauthorized access
+- **Access Denied Modal**: Professional error dialog showing user role and permission requirements
 
 ### AJAX Integration
 
-- **Seamless role updates** without page reloads
-- **Dynamic alert system** with auto-hide functionality
-- **Error handling** with user-friendly messages
-- **Page refresh** after successful updates
+- **Seamless Updates**: Form submissions without page reloads
+- **Real-time Feedback**: Immediate success/error messages
+- **Enhanced UX**: Smooth user interactions
 
-## 📊 GraphQL Queries & Mutations
+### Enhanced Error Handling
 
-### Queries
+- **Comprehensive Logging**: Detailed error tracking
+- **User-friendly Messages**: Clear error communication
+- **Graceful Degradation**: Fallback for failed operations
+- **Debug Console Logs**: Role detection and permission checking
 
-```graphql
-# Get all customers
-query {
-  customers {
-    id
-    firstName
-    lastName
-    contact
-    email
-    dateOfBirth
-  }
-}
+## 🔒 Security Features
 
-# Get customer by ID
-query {
-  customer(id: 1) {
-    id
-    firstName
-    lastName
-    contact
-    email
-    dateOfBirth
-  }
-}
+### Password Security
 
-# Get all users (Admin only)
-query {
-  users {
-    id
-    username
-    email
-    firstName
-    lastName
-    role
-    isActive
-    createdAt
-    lastLoginAt
-  }
-}
+- **SHA256 Hashing**: Secure password storage
+- **Salt Implementation**: Enhanced security
+- **Password Verification**: Secure authentication
 
-# Get user by username
-query {
-  user(username: "admin") {
-    id
-    username
-    email
-    firstName
-    lastName
-    role
-    isActive
-    createdAt
-    lastLoginAt
-  }
-}
+### Session Management
 
-# Get user by ID
-query {
-  userById(id: 1) {
-    id
-    username
-    email
-    firstName
-    lastName
-    role
-    isActive
-    createdAt
-    lastLoginAt
-  }
-}
+- **Cookie-based Authentication**: Secure session handling
+- **Configurable Timeouts**: Flexible session duration
+- **Sliding Expiration**: Extended sessions for active users
 
-# Get available roles
-query {
-  roles
-}
-```
+### Access Denied Handling
 
-### Mutations
-
-```graphql
-# Create customer
-mutation {
-  addCustomer(
-    firstName: "John"
-    lastName: "Doe"
-    contact: "+1-555-0123"
-    email: "john.doe@example.com"
-    dateOfBirth: "1990-01-01"
-  ) {
-    id
-    firstName
-    lastName
-    contact
-    email
-    dateOfBirth
-  }
-}
-
-# Update customer
-mutation {
-  updateCustomer(
-    id: 1
-    firstName: "John"
-    lastName: "Smith"
-    contact: "+1-555-0123"
-    email: "john.smith@example.com"
-    dateOfBirth: "1990-01-01"
-  ) {
-    id
-    firstName
-    lastName
-    contact
-    email
-    dateOfBirth
-  }
-}
-
-# Create user (Admin only)
-mutation {
-  addUser(
-    username: "newuser"
-    email: "newuser@example.com"
-    password: "password123"
-    firstName: "New"
-    lastName: "User"
-    role: "User"
-  ) {
-    id
-    username
-    email
-    firstName
-    lastName
-    role
-    isActive
-    createdAt
-  }
-}
-
-# Update user role (Admin only)
-mutation {
-  updateUserRole(id: 1, role: "Manager") {
-    id
-    username
-    email
-    firstName
-    lastName
-    role
-    isActive
-    createdAt
-  }
-}
-
-# Update user last login
-mutation {
-  updateUserLastLogin(id: 1) {
-    id
-    username
-    lastLoginAt
-  }
-}
-```
-
-## 🛡️ Security Features
-
-### Authentication
-
-- **Cookie-based authentication** with secure settings
-- **Password hashing** using SHA256
-- **Session management** with configurable expiration
-- **Remember me** functionality
-
-### Authorization
-
-- **Role-based access control** with granular permissions
-- **Controller-level authorization** using `[Authorize(Roles = "...")]`
-- **Action-level authorization** for fine-grained control
-- **UI-based role filtering** showing/hiding features based on user role
-
-### Data Protection
-
-- **Model binding protection** using `[Bind]` attributes
-- **CSRF protection** with anti-forgery tokens
-- **Input validation** with data annotations
-- **SQL injection prevention** through Entity Framework Core
-
-## 🔧 Configuration
-
-### Connection Strings
-
-The application uses SQL Server LocalDB by default:
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=jqueryDb;Trusted_Connection=true;TrustServerCertificate=true"
-  }
-}
-```
-
-### GraphQL Settings
-
-```json
-{
-  "GraphQL": {
-    "ExposeExceptions": true
-  }
-}
-```
+- **User-friendly Pages**: Clear access denied messages
+- **Role Information**: Display current user permissions
+- **Navigation Options**: Easy access to authorized areas
 
 ## 🧪 Testing
 
+### PowerShell Test Scripts
+
+- **`test-auth.ps1`**: Authentication testing
+- **`verify-users.ps1`**: User verification scripts
+
 ### Manual Testing
 
-1. **Start both applications** (GraphQL API and MVC)
-2. **Login with different roles** to test authorization
-3. **Navigate through the application** to verify role-based access
-4. **Test modal functionality** in user management
-5. **Test GraphQL queries** in Banana Cake Pop IDE
-6. **Verify database seeding** with demo data
+1. **Login with demo users** using the provided credentials
+2. **Test role-based access** by accessing different features
+3. **Verify customer operations** with different user roles
+4. **Test user management** as an admin user
+5. **Check permission denied modals** by logging in as User/Guest and clicking Edit buttons
 
-### Modal Testing
+## 📚 Code Examples
 
-1. **Login as admin** to access user management
-2. **Click "Details"** on any user to see the modal popup
-3. **Click "Edit Role"** to test role editing functionality
-4. **Test role changes** and verify immediate feedback
-5. **Check page updates** after successful role changes
+### JavaScript Role Detection
 
-### AJAX Testing
+```javascript
+// Get user role from server-side
+const userRole =
+  '@User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value' ||
+  "Guest";
 
-1. **Test customer editing** via modal dialogs
-2. **Verify real-time updates** without page reloads
-3. **Check error handling** with invalid data
-4. **Test form validation** and feedback messages
+function showEditCustomer(
+  id,
+  firstName,
+  lastName,
+  contact,
+  email,
+  dateOfBirth
+) {
+  // Check if user has permission to edit customers
+  const hasEditPermission = userRole === "Admin" || userRole === "Manager";
 
-### Automated Testing
+  console.log("User Role:", userRole);
+  console.log("Has Edit Permission:", hasEditPermission);
 
-```bash
-# Build the solution
-dotnet build
-
-# Run tests (if any)
-dotnet test
+  if (!hasEditPermission) {
+    // Show error message for unauthorized users
+    document.getElementById("userRoleDisplay").textContent = userRole;
+    const modal = new bootstrap.Modal(
+      document.getElementById("permissionDeniedModal")
+    );
+    modal.show();
+    return;
+  }
+  // ... proceed with edit modal
+}
 ```
 
-## 📝 Logging
+### Permission Denied Modal
 
-The application includes comprehensive logging:
+```html
+<!-- Permission Denied Modal -->
+<div class="modal fade" id="permissionDeniedModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-shield-exclamation"></i> Access Denied
+        </h5>
+      </div>
+      <div class="modal-body text-center">
+        <i class="bi bi-lock display-1 text-danger mb-3"></i>
+        <h4 class="text-danger mb-3">Permission Required</h4>
+        <p class="text-muted mb-4">
+          You do not have permission to edit customers. Only
+          <strong>Administrators</strong> and <strong>Managers</strong> can edit
+          customer information.
+        </p>
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle"></i>
+          <strong>Your Role:</strong> <span id="userRoleDisplay"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+```
 
-- **Authentication events** (login, logout, failed attempts)
-- **Authorization decisions** (access granted/denied)
-- **GraphQL operations** (queries, mutations, errors)
-- **Database operations** (seeding, migrations)
-- **User management** (creation, role updates)
-- **Modal interactions** (user details, role editing)
-- **AJAX operations** (real-time updates, error handling)
-- **Error tracking** with detailed stack traces
+### ExecuteQueryAsync Method
+
+The `ExecuteQueryAsync` method in `GraphQLClient` handles HTTP communication with the GraphQL API:
+
+```csharp
+public async Task<GraphQLResponse<T>> ExecuteQueryAsync<T>(string query, object? variables = null)
+{
+    try
+    {
+        var request = new
+        {
+            query,
+            variables
+        };
+
+        var json = JsonSerializer.Serialize(request);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var response = await _httpClient.PostAsync("", content);
+        var responseContent = await response.Content.ReadAsStringAsync();
+
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
+        var graphQLResponse = JsonSerializer.Deserialize<GraphQLResponse<T>>(responseContent, options);
+
+        if (graphQLResponse?.Errors?.Any() == true)
+        {
+            var errorMessages = string.Join(", ", graphQLResponse.Errors.Select(e => e.Message));
+            _logger.LogError("GraphQL errors: {Errors}", errorMessages);
+        }
+
+        return graphQLResponse ?? new GraphQLResponse<T>();
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error executing GraphQL query");
+        throw;
+    }
+}
+```
+
+## 🔧 Service Layer Architecture
+
+### GraphQL Client
+
+- **`IGraphQLClient`**: Common interface for GraphQL communication
+- **`GraphQLClient`**: HTTP client implementation with error handling
+- **Response Models**: Separate classes for `GraphQLResponse`, `GraphQLData`, `GraphQLError`, `GraphQLLocation`
+
+### Business Services
+
+- **`ICustomerService`**: Customer-specific business logic
+- **`IUserService`**: User management operations
+- **`IAuthService`**: Authentication and authorization
+
+### Separation of Concerns
+
+- **Entity-Specific Services**: Each entity has its own service interface
+- **Common GraphQL Client**: Shared HTTP client for all services
+- **Clean Architecture**: Clear separation between data access and business logic
+
+## 📊 Logging
+
+### Comprehensive Logging Strategy
+
+- **HTTP Client Logging**: Track GraphQL API communication
+- **Service Layer Logging**: Business operation tracking
+- **Controller Logging**: User action monitoring
+- **Error Logging**: Detailed exception information
+- **Debug Logging**: Role detection and permission checking
+
+### Log Levels
+
+- **Information**: Normal operations and user actions
+- **Warning**: Validation failures and business rule violations
+- **Error**: Exceptions and system failures
+- **Debug**: Development-time debugging information
 
 ## 🚀 Deployment
 
-### Development
+### Production Considerations
 
-```bash
-# GraphQL API
-cd GraphQL.WebApi
-dotnet run
+- **Environment Configuration**: Use `appsettings.Production.json`
+- **Database Migration**: Run `dotnet ef database update` on production
+- **HTTPS Configuration**: Configure SSL certificates
+- **Logging Configuration**: Set appropriate log levels
+- **Security Headers**: Configure security middleware
 
-# MVC Application
-cd GraphQL.WebApi.Mvc
-dotnet run
+### Docker Support
+
+- **Multi-stage Builds**: Optimize container size
+- **Health Checks**: Monitor application health
+- **Environment Variables**: Configure via environment
+
+## 📖 Additional Resources
+
+- **GraphQL Documentation**: https://graphql.org/
+- **HotChocolate**: https://chillicream.com/docs/hotchocolate
+- **Entity Framework Core**: https://docs.microsoft.com/en-us/ef/core/
+- **ASP.NET Core**: https://docs.microsoft.com/en-us/aspnet/core/
+
+## 🔄 Recent Architecture Refactoring
+
+### Service Organization Improvements
+
+**Before**: All services in single namespace with project reference conflicts
+
+```csharp
+// Old structure - namespace conflicts
+using GraphQL.WebApi.Model; // Caused circular dependency
 ```
 
-### Production
+**After**: Organized services with local role definitions
 
-```bash
-# Build for production
-dotnet publish -c Release
-
-# Deploy to your preferred hosting platform
+```csharp
+// New structure - clean separation
+namespace GraphQL.WebApi.Mvc.Services
+{
+    public interface ICustomerService { /* ... */ }
+    public interface IUserService { /* ... */ }
+    public interface IAuthService { /* ... */ }
+}
 ```
 
-## 🔄 Database Migrations
+### GraphQL Response Class Separation
 
-```bash
-# Create new migration
-dotnet ef migrations add MigrationName
+**Before**: All response classes in single file
 
-# Apply migrations
-dotnet ef database update
-
-# Remove last migration
-dotnet ef migrations remove
+```csharp
+// Old approach - everything in one file
+public interface IGraphQLClient { /* ... */ }
+public class GraphQLResponse { /* ... */ }
+public class GraphQLData { /* ... */ }
+public class GraphQLError { /* ... */ }
 ```
 
-## 📚 Additional Resources
+**After**: Separate files for each response class
 
-- [ASP.NET Core Documentation](https://docs.microsoft.com/en-us/aspnet/core/)
-- [HotChocolate GraphQL Documentation](https://chillicream.com/docs/hotchocolate)
-- [Entity Framework Core Documentation](https://docs.microsoft.com/en-us/ef/core/)
-- [GraphQL Specification](https://graphql.org/learn/)
-- [Bootstrap 5 Documentation](https://getbootstrap.com/docs/5.0/)
+```csharp
+// New approach - single responsibility
+// GraphQLResponse.cs
+public class GraphQLResponse<T> { /* ... */ }
 
-## 🤝 Contributing
+// GraphQLData.cs
+public class GraphQLData { /* ... */ }
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+// GraphQLError.cs
+public class GraphQLError { /* ... */ }
 
-## 📄 License
+// GraphQLLocation.cs
+public class GraphQLLocation { /* ... */ }
+```
 
-This project is licensed under the MIT License.
+### Enhanced GraphQL Error Handling
+
+**Before**: Basic error logging
+
+```csharp
+if (result?.Errors?.Any() == true)
+{
+    var errorMessages = string.Join(", ", result.Errors.Select(e => e.Message));
+    _logger.LogError("GraphQL errors: {Errors}", errorMessages);
+}
+```
+
+**After**: Detailed error location tracking
+
+```csharp
+if (result?.Errors?.Any() == true)
+{
+    var errorMessages = result.Errors.Select(e =>
+    {
+        var location = e.Locations?.FirstOrDefault();
+        if (location != null)
+        {
+            return $"Error at line {location.Line}, column {location.Column}: {e.Message}";
+        }
+        return $"Error: {e.Message}";
+    });
+    _logger.LogError("GraphQL errors: {Errors}", string.Join("; ", errorMessages));
+}
+```
+
+## 📈 Current Project Status
+
+### ✅ Completed Features
+
+- **GraphQL API**: Full CRUD operations for customers and users
+- **MVC Frontend**: Complete web interface with Bootstrap 5
+- **Role-Based Access Control**: Comprehensive permission system
+- **Modal Dialogs**: Professional user interface components
+- **AJAX Integration**: Seamless user experience
+- **Error Handling**: Comprehensive logging and user feedback
+- **Permission Denied Modals**: Professional error dialogs
+- **Debug Logging**: Role detection and permission checking
+
+### 🎯 Key Improvements
+
+- **Service Layer Architecture**: Clean separation of concerns
+- **GraphQL Response Models**: Organized and maintainable
+- **Enhanced Error Handling**: Detailed error tracking
+- **Professional UI**: Modal-based permission denied dialogs
+- **Comprehensive Logging**: Debug information for development
+
+### 🔧 Technical Highlights
+
+- **ASP.NET Core 8**: Latest framework features
+- **HotChocolate GraphQL**: Modern GraphQL implementation
+- **Entity Framework Core 8**: Advanced ORM capabilities
+- **Bootstrap 5**: Modern responsive design
+- **Role-Based Security**: Advanced authorization system
+- **Professional UX**: Modal dialogs and error handling
 
 ---
 
-**Note**: This is a demonstration project showcasing GraphQL implementation with ASP.NET Core 8 and role-based access control. For production use, consider implementing additional security measures such as HTTPS enforcement, rate limiting, and more robust password hashing algorithms.
+**Note**: This project demonstrates modern web development practices with GraphQL, ASP.NET Core, and comprehensive role-based access control. The architecture supports scalability and maintainability while providing an excellent user experience.
